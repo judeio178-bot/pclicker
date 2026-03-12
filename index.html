@@ -1,1827 +1,1647 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAULY CLICKER</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #ff4757;
-            --primary-dark: #ff1e32;
-            --secondary: #2ed573;
-            --secondary-dark: #1bad5b;
-            --accent-pink: #ff6b81;
-            --accent-cyan: #00d2d3;
-            --bg-dark: #1e272e;
-            --bg-panel: rgba(47, 53, 66, 0.75);
-            --bg-panel-border: rgba(255, 255, 255, 0.1);
-            --text-light: #f1f2f6;
-            --text-gold: #eccc68;
-            --text-muted: #a4b0be;
-            --panel-radius: 16px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-        }
-
-        /* ----- Background Overlay System ----- */
-        body {
-            font-family: 'Outfit', sans-serif;
-            color: var(--text-light);
-            height: 100vh;
-            width: 100vw;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            background-color: transparent;
-        }
-
-        .bg-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('background.png');
-            background-size: cover;
-            background-position: center;
-            z-index: -2;
-            animation: parallax 30s ease-in-out infinite alternate;
-        }
-
-        .bg-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(30, 39, 46, 0.4), rgba(47, 53, 66, 0.5));
-            backdrop-filter: blur(2px);
-            z-index: -1;
-        }
-
-        @keyframes parallax {
-            0% {
-                transform: translateY(0) scale(1);
-            }
-
-            100% {
-                transform: translateY(-20px) scale(1.05);
-            }
-        }
-
-        /* ------------------------------------- */
-
-        header {
-            text-align: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            z-index: 10;
-            border-bottom: 1px solid var(--accent-pink);
-        }
-
-        h1 {
-            font-weight: 900;
-            font-size: 3rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-pink);
-            text-shadow: 0 0 10px rgba(255, 107, 129, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8);
-            margin-bottom: 5px;
-        }
-
-        header p {
-            color: var(--text-gold);
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        #flavor-text {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-style: italic;
-            margin-top: 5px;
-            min-height: 1.2rem;
-            transition: opacity 0.5s;
-        }
-
-        .main-container {
-            display: flex;
-            flex: 1;
-            padding: 20px;
-            gap: 20px;
-            overflow: hidden;
-            z-index: 10;
-        }
-
-        /* ----- Base Glass Panel Style ----- */
-        .glass-panel {
-            background: rgba(30, 40, 50, 0.6);
-            /* Semi-transparent panel background */
-            backdrop-filter: blur(12px);
-            border-radius: var(--panel-radius);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        /* ----- Stats Panel ----- */
-        .stats-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 20px;
-            overflow-y: auto;
-            background: rgba(30, 40, 50, 0.6);
-        }
-
-        /* Minimal scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent-cyan);
-            border-radius: 10px;
-        }
-
-        .stat-box {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-        }
-
-        .stat-box:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 900;
-            color: var(--text-gold);
-            margin-top: 5px;
-            text-shadow: 0 0 10px rgba(236, 204, 104, 0.3);
-        }
-
-        .stat-value.decay {
-            color: var(--primary);
-        }
-
-        /* ----- Center Game Panel ----- */
-        .center-panel {
-            flex: 1.5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-        }
-
-        /* Activity Toggles */
-        .activity-toggle-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 8px;
-            border-radius: 20px;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            justify-content: center;
-        }
-
-        .activity-btn {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 12px;
-            background: transparent;
-            color: var(--text-muted);
-            font-family: inherit;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .activity-btn.locked {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .activity-btn.active {
-            background: linear-gradient(135deg, var(--accent-cyan), #0984e3);
-            color: white;
-            box-shadow: 0 5px 15px rgba(0, 210, 211, 0.4);
-            transform: scale(1.05);
-        }
-
-        .activity-btn:hover:not(.locked) {
-            transform: scale(1.03);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .click-area {
-            position: relative;
-            cursor: pointer;
-            width: 350px;
-            height: 350px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 107, 129, 0.15) 0%, transparent 60%);
-            transition: transform 0.1s;
-        }
-
-        .click-area.active-taller {
-            background: radial-gradient(circle, rgba(0, 210, 211, 0.15) 0%, transparent 60%);
-        }
-
-        .click-area.active-lift {
-            background: radial-gradient(circle, rgba(236, 204, 104, 0.15) 0%, transparent 60%);
-        }
-
-        .click-area.active-talk {
-            background: radial-gradient(circle, rgba(255, 71, 87, 0.15) 0%, transparent 60%);
-        }
-
-        .click-area:active {
-            transform: scale(0.96);
-        }
-
-        #pauly-img {
-            max-width: 65%;
-            max-height: 65%;
-            object-fit: contain;
-            filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.6));
-            pointer-events: none;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* Click Particles */
-        .click-particle {
-            position: absolute;
-            color: white;
-            font-weight: 900;
-            font-size: 1.5rem;
-            pointer-events: none;
-            text-shadow: 2px 2px 0px #000;
-            animation: particleUp 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
-            z-index: 100;
-        }
-
-        .particle-taller {
-            color: var(--accent-cyan);
-        }
-
-        .particle-lift {
-            color: var(--text-gold);
-        }
-
-        .particle-talk {
-            color: var(--primary);
-        }
-
-        @keyframes particleUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(0.5);
-            }
-
-            20% {
-                transform: translateY(-20px) scale(1.2);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translateY(-80px) scale(1);
-            }
-        }
-
-        /* Progress Bars */
-        .progress-section {
-            width: 90%;
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .progress-wrapper {
-            width: 100%;
-        }
-
-        .progress-label {
-            font-size: 0.8rem;
-            margin-bottom: 5px;
-            color: var(--text-light);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .progress-container {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 15px;
-            height: 20px;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            border-radius: 15px;
-            width: 0%;
-            transition: width 0.3s ease;
-            position: relative;
-        }
-
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transform: translateX(-100%);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            100% {
-                transform: translateX(100%);
-            }
-        }
-
-        #prog-height .progress-bar {
-            background: linear-gradient(90deg, var(--accent-cyan), #0984e3);
-        }
-
-        #prog-fatigue .progress-bar {
-            background: linear-gradient(90deg, var(--text-gold), #d35400);
-        }
-
-        /* ----- Shop Panel ----- */
-        .shop-panel {
-            flex: 1.5;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* Shop Tabs */
-        .shop-tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 10px;
-            overflow-x: auto;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-family: inherit;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .tab-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-light);
-        }
-
-        .tab-btn.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .upgrades-container {
-            flex: 1;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .upgrades-list {
-            padding: 15px;
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .upgrades-list.active {
-            display: flex;
-        }
-
-        .upgrade-btn {
-            background: linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upgrade-btn:hover:not(.locked) {
-            border-color: var(--accent-cyan);
-            transform: translateX(-4px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-        }
-
-        .upgrade-btn.locked {
-            opacity: 0.4;
-            filter: grayscale(1);
-            cursor: not-allowed;
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        .stat-box {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px 15px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.2s, background 0.2s, border-color 0.2s;
-        }
-
-        .stat-box:hover {
-            transform: translateX(5px);
-            background: rgba(0, 210, 211, 0.1);
-            border-color: rgba(0, 210, 211, 0.3);
-        }
-
-        .stat-value {
-            font-weight: 700;
-            color: var(--text-gold);
-            font-size: 1.1rem;
-        }
-
-        .upgrade-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-            margin-right: 15px;
-            margin-left: 20px;
-        }
-
-        .upgrade-name {
-            font-weight: 900;
-            color: #fff;
-            font-size: 1.1rem;
-        }
-
-        .upgrade-desc {
-            font-size: 0.85rem;
-            color: #bdc3c7;
-            line-height: 1.2;
-        }
-
-        .upgrade-cost-box {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-        }
-
-        .upgrade-cost {
-            font-weight: bold;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-
-        .cost-height {
-            color: var(--accent-cyan);
-            background: rgba(0, 210, 211, 0.1);
-            border: 1px solid rgba(0, 210, 211, 0.3);
-        }
-
-        .cost-strength {
-            color: var(--text-gold);
-            background: rgba(236, 204, 104, 0.1);
-            border: 1px solid rgba(236, 204, 104, 0.3);
-        }
-
-        .cost-jacky {
-            color: var(--secondary);
-            background: rgba(46, 213, 115, 0.1);
-            border: 1px solid rgba(46, 213, 115, 0.3);
-        }
-
-        .upgrade-count {
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: 25px;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #aaa;
-            font-size: 0.9rem;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* ----- Jacky Swarm Panel ----- */
-        .jacky-panel {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 15px;
-            border: 1px solid rgba(46, 213, 115, 0.2);
-            position: relative;
-        }
-
-        .jacky-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            color: var(--secondary);
-            font-weight: bold;
-        }
-
-        /* ----- Jacky Orbit System ----- */
-        #orbit-swarm {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        .orbit-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .orbit-jacky {
-            position: absolute;
-            width: 48px;
-            height: 48px;
-            margin-top: -24px;
-            margin-left: -24px;
-            background-image: url('jacky.png');
-            background-size: cover;
-            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.8));
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.2s;
-            z-index: 15;
-            will-change: transform;
-        }
-
-        /* The entire swarm rotates as one cohesive unit */
-        @keyframes rotateOrbit {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Counter rotation keeps them upright */
-        @keyframes rotateOrbitRev {
-            0% {
-                transform: rotate(360deg);
-            }
-
-            100% {
-                transform: rotate(0deg);
-            }
-        }
-
-        /* Achievement Toasts */
-        #toast-container {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 1000;
-            pointer-events: none;
-        }
-
-        .toast-popup {
-            background: rgba(10, 15, 20, 0.9);
-            border-left: 4px solid var(--accent-gold);
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.5s ease 4s forwards;
-            min-width: 250px;
-            text-align: center;
-        }
-
-        .toast-popup strong {
-            display: block;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            margin-bottom: 3px;
-        }
-
-        .achievement-item {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .achievement-item .ach-icon {
-            font-size: 1.5rem;
-            filter: grayscale(1) opacity(0.3);
-            transition: filter 0.3s;
-        }
-
-        .achievement-item.unlocked .ach-icon {
-            filter: grayscale(0) opacity(1);
-        }
-
-        .achievement-item .ach-details h4 {
-            margin: 0 0 4px 0;
-            color: var(--text-muted);
-        }
-
-        .achievement-item.unlocked .ach-details h4 {
-            color: var(--accent-gold);
-        }
-
-        .achievement-item .ach-details p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            to {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-        }
-
-        /* ----- Log Panel ----- */
-        .log-panel {
-            background: rgba(0, 0, 0, 0.5);
-            border-top: 1px solid var(--bg-panel-border);
-            height: 120px;
-            padding: 10px 20px;
-            overflow-y: auto;
-            font-size: 0.9rem;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 10;
-        }
-
-        .log-entry {
-            animation: slideIn 0.3s cubic-bezier(0.1, 0.8, 0.3, 1);
-            border-left: 3px solid transparent;
-            padding-left: 8px;
-            line-height: 1.3;
-        }
-
-        .log-entry.normal {
-            border-color: rgba(255, 255, 255, 0.2);
-            color: #ecf0f1;
-        }
-
-        .log-entry.success {
-            border-color: var(--secondary);
-            color: var(--secondary);
-        }
-
-        .log-entry.fail {
-            border-color: var(--primary);
-            color: #ffa502;
-        }
-
-        .log-entry.milestone {
-            border-color: var(--text-gold);
-            color: var(--text-gold);
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        .log-entry.jacky {
-            border-color: var(--secondary-dark);
-            color: #81ecec;
-        }
-
-        .log-entry.bad {
-            border-color: var(--primary);
-            color: var(--primary-dark);
-            font-weight: bold;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-15px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            font-size: 0.8rem;
-            color: #747d8c;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 10;
-        }
-
-        .footer-btns {
-            display: flex;
-            gap: 10px;
-        }
-
-        .tiny-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: var(--text-light);
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .tiny-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .tiny-btn.danger:hover {
-            background: var(--primary);
-        }
-
-        /* ----- Tooltips ----- */
-        .tooltip {
-            position: relative;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 220px;
-            background: rgba(10, 10, 10, 0.95);
-            color: #fff;
-            text-align: center;
-            border-radius: 8px;
-            padding: 10px;
-            position: absolute;
-            z-index: 100;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%) translateY(10px);
-            opacity: 0;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-            pointer-events: none;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-weight: normal;
-            line-height: 1.4;
-        }
-
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* ----- Modals ----- */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: 0.3s;
-        }
-
-        .modal-overlay.show {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .modal {
-            background: linear-gradient(135deg, var(--bg-panel), #1e272e);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            text-align: center;
-            border: 2px solid var(--text-gold);
-            max-width: 400px;
-            transform: scale(0.8);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .modal-overlay.show .modal {
-            transform: scale(1);
-        }
-
-        .modal-title {
-            color: var(--text-gold);
-            font-size: 2rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(236, 204, 104, 0.5);
-        }
-
-        .modal-btn {
-            margin-top: 20px;
-            background: linear-gradient(45deg, var(--text-gold), #f39c12);
-            border: none;
-            padding: 10px 25px;
-            border-radius: 8px;
-            font-weight: bold;
-            color: #000;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(236, 204, 104, 0.4);
-            transition: 0.2s;
-            font-family: inherit;
-        }
-
-        .modal-btn:active {
-            transform: scale(0.95);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PAULY CLICKER</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #ff4757;
+      --primary-dark: #ff1e32;
+      --secondary: #2ed573;
+      --secondary-dark: #1bad5b;
+      --accent-pink: #ff6b81;
+      --accent-cyan: #00d2d3;
+      --accent-gold: #eccc68;
+      --bg-dark: #1e272e;
+      --bg-panel: rgba(47, 53, 66, 0.75);
+      --bg-panel-border: rgba(255, 255, 255, 0.1);
+      --text-light: #f1f2f6;
+      --text-gold: #eccc68;
+      --text-muted: #a4b0be;
+      --panel-radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-light);
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background-color: transparent;
+    }
+
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      background-image: url('background.png');
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+      animation: parallax 30s ease-in-out infinite alternate;
+    }
+
+    .bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(30, 39, 46, 0.4), rgba(47, 53, 66, 0.5));
+      backdrop-filter: blur(2px);
+      z-index: -1;
+    }
+
+    @keyframes parallax {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-20px) scale(1.05); }
+    }
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+      border-bottom: 1px solid var(--accent-pink);
+    }
+
+    h1 {
+      font-weight: 900;
+      font-size: 3rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-pink);
+      text-shadow: 0 0 10px rgba(255, 107, 129, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8);
+      margin-bottom: 5px;
+    }
+
+    header p {
+      color: var(--text-gold);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    #flavor-text {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-style: italic;
+      margin-top: 5px;
+      min-height: 1.2rem;
+      transition: opacity 0.5s;
+    }
+
+    .main-container {
+      display: flex;
+      flex: 1;
+      padding: 20px;
+      gap: 20px;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .glass-panel {
+      background: rgba(30, 40, 50, 0.6);
+      backdrop-filter: blur(12px);
+      border-radius: var(--panel-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .stats-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      padding: 20px;
+      overflow-y: auto;
+      background: rgba(30, 40, 50, 0.6);
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-cyan);
+      border-radius: 10px;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px 15px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: transform 0.2s, background 0.2s, border-color 0.2s;
+      position: relative;
+    }
+
+    .stat-box:hover {
+      transform: translateX(5px);
+      background: rgba(0, 210, 211, 0.1);
+      border-color: rgba(0, 210, 211, 0.3);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      color: var(--text-gold);
+      font-size: 1.1rem;
+      text-shadow: 0 0 10px rgba(236, 204, 104, 0.3);
+    }
+
+    .stat-value.decay { color: var(--primary); }
+
+    .center-panel {
+      flex: 1.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .activity-toggle-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px;
+      border-radius: 20px;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      justify-content: center;
+    }
+
+    .activity-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .activity-btn.locked {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .activity-btn.active {
+      background: linear-gradient(135deg, var(--accent-cyan), #0984e3);
+      color: white;
+      box-shadow: 0 5px 15px rgba(0, 210, 211, 0.4);
+      transform: scale(1.05);
+    }
+
+    .activity-btn:hover:not(.locked) {
+      transform: scale(1.03);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .click-area {
+      position: relative;
+      cursor: pointer;
+      width: 350px;
+      height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 107, 129, 0.15) 0%, transparent 60%);
+      transition: transform 0.1s;
+    }
+
+    .click-area.active-tall,
+    .click-area.active-taller {
+      background: radial-gradient(circle, rgba(0, 210, 211, 0.15) 0%, transparent 60%);
+    }
+
+    .click-area.active-lift {
+      background: radial-gradient(circle, rgba(236, 204, 104, 0.15) 0%, transparent 60%);
+    }
+
+    .click-area.active-talk {
+      background: radial-gradient(circle, rgba(255, 71, 87, 0.15) 0%, transparent 60%);
+    }
+
+    .click-area:active { transform: scale(0.96); }
+
+    #pauly-img {
+      max-width: 65%;
+      max-height: 65%;
+      object-fit: contain;
+      filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.6));
+      pointer-events: none;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .click-particle {
+      position: absolute;
+      color: white;
+      font-weight: 900;
+      font-size: 1.5rem;
+      pointer-events: none;
+      text-shadow: 2px 2px 0px #000;
+      animation: particleUp 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+      z-index: 100;
+    }
+
+    .particle-taller { color: var(--accent-cyan); }
+    .particle-lift { color: var(--text-gold); }
+    .particle-talk { color: var(--primary); }
+
+    @keyframes particleUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.5); }
+      20% { transform: translateY(-20px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-80px) scale(1); }
+    }
+
+    .progress-section {
+      width: 90%;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .progress-wrapper { width: 100%; }
+
+    .progress-label {
+      font-size: 0.8rem;
+      margin-bottom: 5px;
+      color: var(--text-light);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-container {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      height: 20px;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 15px;
+      width: 0%;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      100% { transform: translateX(100%); }
+    }
+
+    #prog-height .progress-bar {
+      background: linear-gradient(90deg, var(--accent-cyan), #0984e3);
+    }
+
+    #prog-fatigue .progress-bar {
+      background: linear-gradient(90deg, var(--text-gold), #d35400);
+    }
+
+    .shop-panel {
+      flex: 1.5;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .shop-tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-family: inherit;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-light);
+    }
+
+    .tab-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .upgrades-container {
+      flex: 1;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .upgrades-list {
+      padding: 15px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .upgrades-list.active { display: flex; }
+
+    .upgrade-btn {
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upgrade-btn:hover:not(.locked) {
+      border-color: var(--accent-cyan);
+      transform: translateX(-4px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .upgrade-btn.locked {
+      opacity: 0.4;
+      filter: grayscale(1);
+      cursor: not-allowed;
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .upgrade-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      margin-right: 15px;
+      margin-left: 20px;
+    }
+
+    .upgrade-name {
+      font-weight: 900;
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    .upgrade-desc {
+      font-size: 0.85rem;
+      color: #bdc3c7;
+      line-height: 1.2;
+    }
+
+    .upgrade-cost-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .upgrade-cost {
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .cost-height {
+      color: var(--accent-cyan);
+      background: rgba(0, 210, 211, 0.1);
+      border: 1px solid rgba(0, 210, 211, 0.3);
+    }
+
+    .cost-strength {
+      color: var(--text-gold);
+      background: rgba(236, 204, 104, 0.1);
+      border: 1px solid rgba(236, 204, 104, 0.3);
+    }
+
+    .cost-jacky,
+    .cost-jackys {
+      color: var(--secondary);
+      background: rgba(46, 213, 115, 0.1);
+      border: 1px solid rgba(46, 213, 115, 0.3);
+    }
+
+    .cost-rizz {
+      color: var(--accent-pink);
+      background: rgba(255, 107, 129, 0.1);
+      border: 1px solid rgba(255, 107, 129, 0.3);
+    }
+
+    .cost-reputation {
+      color: #c9c9ff;
+      background: rgba(201, 201, 255, 0.1);
+      border: 1px solid rgba(201, 201, 255, 0.3);
+    }
+
+    .upgrade-count {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 25px;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #aaa;
+      font-size: 0.9rem;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .jacky-panel {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+      border: 1px solid rgba(46, 213, 115, 0.2);
+      position: relative;
+    }
+
+    .jacky-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: var(--secondary);
+      font-weight: bold;
+    }
+
+    #orbit-swarm {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .orbit-jacky {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      margin-top: -24px;
+      margin-left: -24px;
+      background-image: url('jacky.png');
+      background-size: cover;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.8));
+      transition: transform 0.2s, filter 0.2s;
+      z-index: 15;
+      will-change: transform;
+      animation: rotateOrbitRev 15s linear infinite;
+    }
+
+    @keyframes rotateOrbit {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes rotateOrbitRev {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    #toast-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast-popup {
+      background: rgba(10, 15, 20, 0.9);
+      border-left: 4px solid var(--accent-gold);
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.5s ease 4s forwards;
+      min-width: 250px;
+      text-align: center;
+    }
+
+    .toast-popup strong {
+      display: block;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+
+    .achievement-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .achievement-item .ach-icon {
+      font-size: 1.5rem;
+      filter: grayscale(1) opacity(0.3);
+      transition: filter 0.3s;
+    }
+
+    .achievement-item.unlocked .ach-icon {
+      filter: grayscale(0) opacity(1);
+    }
+
+    .achievement-item .ach-details h4 {
+      margin: 0 0 4px 0;
+      color: var(--text-muted);
+    }
+
+    .achievement-item.unlocked .ach-details h4 {
+      color: var(--accent-gold);
+    }
+
+    .achievement-item .ach-details p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-10px); }
+    }
+
+    .log-panel {
+      background: rgba(0, 0, 0, 0.5);
+      border-top: 1px solid var(--bg-panel-border);
+      height: 120px;
+      padding: 10px 20px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .log-entry {
+      animation: slideIn 0.3s cubic-bezier(0.1, 0.8, 0.3, 1);
+      border-left: 3px solid transparent;
+      padding-left: 8px;
+      line-height: 1.3;
+    }
+
+    .log-entry.normal { border-color: rgba(255, 255, 255, 0.2); color: #ecf0f1; }
+    .log-entry.success { border-color: var(--secondary); color: var(--secondary); }
+    .log-entry.fail { border-color: var(--primary); color: #ffa502; }
+    .log-entry.milestone { border-color: var(--text-gold); color: var(--text-gold); font-weight: bold; font-size: 1rem; }
+    .log-entry.jacky { border-color: var(--secondary-dark); color: #81ecec; }
+    .log-entry.bad { border-color: var(--primary); color: var(--primary-dark); font-weight: bold; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-15px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      color: #747d8c;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 10;
+    }
+
+    .footer-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .tiny-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-light);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tiny-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .tiny-btn.danger:hover {
+      background: var(--primary);
+    }
+
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 220px;
+      background: rgba(10, 10, 10, 0.95);
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 10px;
+      position: absolute;
+      z-index: 100;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      opacity: 0;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      pointer-events: none;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: normal;
+      line-height: 1.4;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.3s;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: linear-gradient(135deg, var(--bg-panel), #1e272e);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      border: 2px solid var(--text-gold);
+      max-width: 400px;
+      transform: scale(0.8);
+      transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      color: var(--text-gold);
+      font-size: 2rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(236, 204, 104, 0.5);
+    }
+
+    .modal-btn {
+      margin-top: 20px;
+      background: linear-gradient(45deg, var(--text-gold), #f39c12);
+      border: none;
+      padding: 10px 25px;
+      border-radius: 8px;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(236, 204, 104, 0.4);
+      transition: 0.2s;
+      font-family: inherit;
+    }
+
+    .modal-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
 </head>
-
 <body>
+  <div class="bg-layer"></div>
+  <div class="bg-overlay"></div>
 
-    <div class="bg-layer"></div>
-    <div class="bg-overlay"></div>
+  <header>
+    <h1>PAULY CLICKER</h1>
+    <p>From 0 feet to a civilization-threatening giant.</p>
+    <div id="flavor-text">Pauly is looking unusually short today.</div>
+  </header>
 
-    <header>
-        <h1>PAULY CLICKER</h1>
-        <p>From 0 feet to a civilization-threatening giant.</p>
-        <div id="flavor-text">Pauly is looking unusually short today.</div>
-    </header>
+  <div class="main-container">
+    <div class="stats-panel glass-panel">
+      <div class="stat-box tooltip">
+        <div class="stat-label">HEIGHT</div>
+        <div class="stat-value" id="val-height">0.0 ft</div>
+        <span class="tooltiptext">Your primary measure of power. Beware height decay if you grow too tall with unchecked ego!</span>
+      </div>
 
-    <div class="main-container">
+      <div class="stat-box tooltip" id="box-strength" style="display:none;">
+        <div class="stat-label">STRENGTH</div>
+        <div class="stat-value" id="val-strength" style="color:var(--text-gold);">0</div>
+        <span class="tooltiptext">Boosts click power and height multiplier. Gain by Lifting Weights.</span>
+      </div>
 
-        <!-- Left Stats Panel -->
-        <div class="stats-panel glass-panel">
-            <div class="stat-box tooltip">
-                <div class="stat-label">HEIGHT</div>
-                <div class="stat-value" id="val-height">0.0 ft</div>
-                <span class="tooltiptext">Your primary measure of power. Beware height decay if you grow too tall with
-                    unchecked ego!</span>
-            </div>
+      <div class="stat-box tooltip" id="box-rizz" style="display:none;">
+        <div class="stat-label">RIZZ</div>
+        <div class="stat-value" id="val-rizz" style="color:var(--accent-pink);">0</div>
+        <span class="tooltiptext">Aura of attraction. Boosts passive generation and unlocks social paths.</span>
+      </div>
 
-            <div class="stat-box tooltip" id="box-strength" style="display: none;">
-                <div class="stat-label">STRENGTH</div>
-                <div class="stat-value" id="val-strength" style="color:var(--text-gold);">0</div>
-                <span class="tooltiptext">Boosts click power and height multiplier. Gain by Lifting Weights.</span>
-            </div>
+      <div class="stat-box">
+        <div class="stat-label">EGO</div>
+        <div class="stat-value" id="val-ego" style="color:#e74c3c;">0</div>
+      </div>
 
-            <div class="stat-box tooltip" id="box-rizz" style="display: none;">
-                <div class="stat-label">RIZZ</div>
-                <div class="stat-value" id="val-rizz" style="color:var(--accent-pink);">0</div>
-                <span class="tooltiptext">Aura of attraction. Boosts passive generation and unlocks social paths.</span>
-            </div>
+      <div class="stat-box tooltip" id="box-reputation" style="display:none;">
+        <div class="stat-label">REPUTATION</div>
+        <div class="stat-value" id="val-rep">0</div>
+        <span class="tooltiptext">How the world views you.</span>
+      </div>
 
-            <div class="stat-box">
-                <div class="stat-label">EGO</div>
-                <div class="stat-value" id="val-ego" style="color:#e74c3c;">0</div>
-            </div>
-
-            <div class="stat-box tooltip" id="box-reputation" style="display: none;">
-                <div class="stat-label">REPUTATION</div>
-                <div class="stat-value" id="val-rep">0</div>
-                <span class="tooltiptext">How the world views you.</span>
-            </div>
-
-            <!-- Jacky Panel (Hidden early on) -->
-            <div class="jacky-panel" id="jacky-panel" style="display: none;">
-                <div class="jacky-header">
-                    <span>JACKY COLONY</span>
-                    <span id="val-jackys">0</span>
-                </div>
-                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px; text-align: center;" id="jacky-prod">
-                    Generates 0 height/s
-                </div>
-            </div>
+      <div class="jacky-panel" id="jacky-panel" style="display:none;">
+        <div class="jacky-header">
+          <span>JACKY COLONY</span>
+          <span id="val-jackys">0</span>
         </div>
-
-        <!-- Center Game Panel -->
-        <div class="center-panel glass-panel">
-
-            <div class="activity-toggle-container">
-                <button class="activity-btn active" id="act-tall" onclick="setActivity('tall')">
-                    <span style="font-size:1.5rem">📏</span>
-                    GET TALLER
-                </button>
-                <button class="activity-btn locked tooltip" id="act-lift" onclick="setActivity('lift')">
-                    <span style="font-size:1.5rem">💪</span>
-                    THE GYM
-                    <span class="tooltiptext" id="tt-lift">Unlocks at 3.0 ft.</span>
-                </button>
-                <button class="activity-btn locked tooltip" id="act-talk" onclick="setActivity('talk')">
-                    <span style="font-size:1.5rem">👄</span>
-                    TALK TO GIRLS
-                    <span class="tooltiptext" id="tt-talk">Unlocks at 5.0 ft or 20 Strength.</span>
-                </button>
-            </div>
-
-            <div class="click-area active-taller" id="click-circle" onclick="clickPauly(event)">
-                <div id="orbit-swarm"></div>
-                <img src="pauly.png" id="pauly-img" alt="Pauly"
-                    onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><circle cx=\'100\' cy=\'100\' r=\'100\' fill=\'%2357606f\'/><text x=\'50%\' y=\'50%\' font-family=\'sans-serif\' font-size=\'20\' fill=\'white\' text-anchor=\'middle\' dy=\'.3em\'>Pauly</text></svg>'">
-            </div>
-
-            <div style="text-align:center; margin-top:10px; color:var(--text-muted); font-size:0.9rem;">
-                Click Power: <span id="val-clickpwr" style="color:var(--text-light); font-weight:bold;">0.1</span> |
-                Passive: <span id="val-passive" style="color:var(--text-light); font-weight:bold;">0.0/s</span>
-            </div>
-
-            <div class="progress-section">
-                <!-- Milestone Progress -->
-                <div class="progress-wrapper">
-                    <div class="progress-label">
-                        <span>Milestone Progress</span>
-                        <span id="prog-text">Next: 1.0 ft</span>
-                    </div>
-                    <div class="progress-container" id="prog-height">
-                        <div class="progress-bar"></div>
-                    </div>
-                </div>
-
-                <!-- Gym Fatigue Progress (Hidden by default) -->
-                <div class="progress-wrapper" id="prog-wrap-fatigue" style="display: none;">
-                    <div class="progress-label tooltip">
-                        <span style="color:#d35400;">Gym Fatigue</span>
-                        <span id="prog-text-fatigue">0%</span>
-                        <span class="tooltiptext">If this maxes out, lifting gives diminishing returns. Switch
-                            activities to rest.</span>
-                    </div>
-                    <div class="progress-container" id="prog-fatigue">
-                        <div class="progress-bar"></div>
-                    </div>
-                </div>
-            </div>
+        <div style="font-size:0.8rem;color:#aaa;margin-top:5px;text-align:center;" id="jacky-prod">
+          Generates 0 height/s
         </div>
-
-        <!-- Right Shop Panel -->
-        <div class="shop-panel glass-panel">
-            <div class="shop-tabs">
-                <button class="tab-btn active" onclick="switchTab('growth')">Growth</button>
-                <button class="tab-btn" onclick="switchTab('gym')" id="tab-gym" style="display:none;">Gym</button>
-                <button class="tab-btn" onclick="switchTab('jacky')" id="tab-jacky"
-                    style="display:none;">Jackys</button>
-                <button class="tab-btn" onclick="switchTab('achievements')">Trophies</button>
-            </div>
-
-            <div class="upgrades-container">
-                <div class="upgrades-list active" id="shop-growth"></div>
-                <div class="upgrades-list" id="shop-gym"></div>
-                <div class="upgrades-list" id="shop-jacky"></div>
-                <div class="upgrades-list" id="shop-achievements"></div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <!-- Bottom Log Feed -->
-    <div class="log-panel" id="event-log">
-        <div class="log-entry normal">Welcome to Pauly Clicker. The journey to the clouds begins.</div>
+    <div class="center-panel glass-panel">
+      <div class="activity-toggle-container">
+        <button class="activity-btn active" id="act-tall" onclick="setActivity('tall')">
+          <span style="font-size:1.5rem">📏</span>
+          GET TALLER
+        </button>
+        <button class="activity-btn locked tooltip" id="act-lift" onclick="setActivity('lift')">
+          <span style="font-size:1.5rem">💪</span>
+          THE GYM
+          <span class="tooltiptext" id="tt-lift">Unlocks at 3.0 ft.</span>
+        </button>
+        <button class="activity-btn locked tooltip" id="act-talk" onclick="setActivity('talk')">
+          <span style="font-size:1.5rem">👄</span>
+          TALK TO GIRLS
+          <span class="tooltiptext" id="tt-talk">Unlocks at 5.0 ft or 20 Strength.</span>
+        </button>
+      </div>
+
+      <div class="click-area active-tall" id="click-circle" onclick="clickPauly(event)">
+        <div id="orbit-swarm"></div>
+        <img src="pauly.png" id="pauly-img" alt="Pauly"
+          onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><circle cx=\'100\' cy=\'100\' r=\'100\' fill=\'%2357606f\'/><text x=\'50%\' y=\'50%\' font-family=\'sans-serif\' font-size=\'20\' fill=\'white\' text-anchor=\'middle\' dy=\'.3em\'>Pauly</text></svg>'">
+      </div>
+
+      <div style="text-align:center; margin-top:10px; color:var(--text-muted); font-size:0.9rem;">
+        Click Power: <span id="val-clickpwr" style="color:var(--text-light);font-weight:bold;">0.1</span> |
+        Passive: <span id="val-passive" style="color:var(--text-light);font-weight:bold;">0.0/s</span>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-wrapper">
+          <div class="progress-label">
+            <span>Milestone Progress</span>
+            <span id="prog-text">Next: 1.0 ft</span>
+          </div>
+          <div class="progress-container" id="prog-height">
+            <div class="progress-bar"></div>
+          </div>
+        </div>
+
+        <div class="progress-wrapper" id="prog-wrap-fatigue" style="display:none;">
+          <div class="progress-label tooltip">
+            <span style="color:#d35400;">Gym Fatigue</span>
+            <span id="prog-text-fatigue">0%</span>
+            <span class="tooltiptext">If this maxes out, lifting gives diminishing returns. Switch activities to rest.</span>
+          </div>
+          <div class="progress-container" id="prog-fatigue">
+            <div class="progress-bar"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <footer>
-        <div>Autosaving via localStorage every 5s</div>
-        <div class="footer-btns">
-            <button class="tiny-btn" onclick="exportSave()">Export</button>
-            <button class="tiny-btn" onclick="importSave()">Import</button>
-            <button class="tiny-btn danger" onclick="hardReset()">Reset Game</button>
-        </div>
-    </footer>
+    <div class="shop-panel glass-panel">
+      <div class="shop-tabs">
+        <button class="tab-btn active" onclick="switchTab('growth')">Growth</button>
+        <button class="tab-btn" onclick="switchTab('gym')" id="tab-gym" style="display:none;">Gym</button>
+        <button class="tab-btn" onclick="switchTab('jacky')" id="tab-jacky" style="display:none;">Jackys</button>
+        <button class="tab-btn" onclick="switchTab('achievements')">Trophies</button>
+      </div>
 
-    <!-- Modals -->
-    <div class="modal-overlay" id="milestone-modal">
-        <div class="modal">
-            <div class="modal-title">🏆 MILESTONE 🏆</div>
-            <h2 id="modal-name">Title</h2>
-            <p id="modal-desc" style="margin-top: 15px; color: #f1f2f6; font-size:1.1rem;">Desc</p>
-            <button class="modal-btn" onclick="closeModal('milestone-modal')">AWESOME</button>
-        </div>
+      <div class="upgrades-container">
+        <div class="upgrades-list active" id="shop-growth"></div>
+        <div class="upgrades-list" id="shop-gym"></div>
+        <div class="upgrades-list" id="shop-jacky"></div>
+        <div class="upgrades-list" id="shop-achievements"></div>
+      </div>
     </div>
+  </div>
 
-    <div id="toast-container"></div>
+  <div class="log-panel" id="event-log">
+    <div class="log-entry normal">Welcome to Pauly Clicker. The journey to the clouds begins.</div>
+  </div>
 
-    <script>
-        /* ================= GAME LOGIC & STATE ================= */
-        const defaultState = {
-            height: 5.5,
-            strength: 0,
-            rizz: 0,
-            ego: 100,
-            reputation: 0,
-            jackys: 0,
-            girlsTalkedTo: 0,
-            gymFatigue: 0,
-            timeSinceTalk: 0,
-            upgrades: {},
-            milestones: [],
-            achievements: {},
-            maxHeightReached: 5.5,
-            maxStrengthReached: 0,
-            gymUnlocked: false,
-            talkUnlocked: false,
-            jackyUnlocked: false,
-            lastSaveTime: Date.now()
-        };
+  <footer>
+    <div>Autosaving via localStorage every 5s</div>
+    <div class="footer-btns">
+      <button class="tiny-btn" onclick="exportSave()">Export</button>
+      <button class="tiny-btn" onclick="importSave()">Import</button>
+      <button class="tiny-btn danger" onclick="hardReset()">Reset Game</button>
+    </div>
+  </footer>
 
-        let state = JSON.parse(localStoreGet('pauly_save')) || JSON.parse(JSON.stringify(defaultState));
+  <div class="modal-overlay" id="milestone-modal">
+    <div class="modal">
+      <div class="modal-title">🏆 MILESTONE 🏆</div>
+      <h2 id="modal-name">Title</h2>
+      <p id="modal-desc" style="margin-top:15px;color:#f1f2f6;font-size:1.1rem;">Desc</p>
+      <button class="modal-btn" onclick="closeModal('milestone-modal')">AWESOME</button>
+    </div>
+  </div>
 
-        let activeActivity = 'tall'; // 'tall', 'lift', 'talk'
-        let cachedStats = { clickPower: 0.1, passiveGrowth: 0, liftPower: 0, jackyProd: 0 };
-        let lastTick = Date.now();
+  <div id="toast-container"></div>
 
-        // --- Data Banks ---
-        const milestones = [
-            { th: 1, name: "Visible to the naked eye", d: "You are no longer microscopic.", unlock: [] },
-            { th: 3, name: "Toddler menace", d: "You can reach the lower cabinet shelves.", unlock: ['lift'] },
-            { th: 5, name: "Average human unlocked", d: "You blend in with the middle schoolers.", unlock: ['talk', 'rizz_ui'] },
-            { th: 6, name: "Respectable king", d: "Tinder bios have legally opened up to you.", unlock: [] },
-            { th: 8, name: "Jacky Infestation", d: "Tiny bugs are gathering around you.", unlock: ['jackys'] },
-            { th: 10, name: "National emergency", d: "The government is tracking your movements.", unlock: [] },
-            { th: 25, name: "Suburban kaiju", d: "Roofs are scratching your knees.", unlock: [] },
-            { th: 50, name: "Skyline nuisance", d: "Godzilla asks for your routine.", unlock: [] }
-        ];
+  <script>
+    const defaultState = {
+      height: 5.5,
+      strength: 0,
+      rizz: 0,
+      ego: 100,
+      reputation: 0,
+      jackys: 0,
+      girlsTalkedTo: 0,
+      gymFatigue: 0,
+      timeSinceTalk: 0,
+      upgrades: {},
+      milestones: [],
+      achievements: {},
+      maxHeightReached: 5.5,
+      maxStrengthReached: 0,
+      gymUnlocked: false,
+      talkUnlocked: false,
+      jackyUnlocked: false,
+      lastSaveTime: Date.now()
+    };
 
-        const upgradesList = [
-            // Growth (Costs Height, boosts Height/Click or Height/Sec)
-            { id: 'u_milk', tab: 'growth', name: 'Whole Milk Gallon', desc: '+0.5 Height/click.', cost: { height: 10 }, multi: 1.15, power: { clickHeight: 0.5 } },
-            { id: 'u_stretch', tab: 'growth', name: 'Suspicious Stretching', desc: '+1.0 Passive Height/s.', cost: { height: 50 }, multi: 1.25, power: { passHeight: 1.0 } },
-            { id: 'u_shoes', tab: 'growth', name: 'Platform Sneakers', desc: '+2.0 Height/click.', cost: { height: 150 }, multi: 1.20, power: { clickHeight: 2.0 } },
-            { id: 'u_nba', tab: 'growth', name: 'NBA Genetics', desc: 'Drastic gains: +5.0 pass, +3.0 click.', cost: { height: 1000 }, multi: 1.30, power: { passHeight: 5.0, clickHeight: 3.0 } },
-            { id: 'u_stilt', tab: 'growth', name: 'Titanium Stilts', desc: '+25.0 Height/click.', cost: { height: 5000 }, multi: 1.25, power: { clickHeight: 25.0 } },
-            { id: 'u_tall_prop', tab: 'growth', name: 'Tall Propaganda', desc: '+50.0 Passive Height/s. Boosts Ego.', cost: { height: 12000, reputation: 5 }, multi: 1.40, power: { passHeight: 50.0 } },
+    let state = JSON.parse(localStoreGet('pauly_save')) || JSON.parse(JSON.stringify(defaultState));
 
-            // Gym (Costs Strength, boosts limits or strength gains)
-            { id: 'g_bench', tab: 'gym', name: 'Bench Press', desc: '+1 Strength/click.', cost: { strength: 10 }, multi: 1.20, power: { clickStrength: 1 } },
-            { id: 'g_pwr', tab: 'gym', name: 'Powerlifting Belt', desc: '+3 Strength/click.', cost: { strength: 60 }, multi: 1.25, power: { clickStrength: 3 } },
-            { id: 'g_creatine', tab: 'gym', name: 'Creatine Phase', desc: 'Reduces fatigue build-up.', cost: { strength: 200 }, multi: 1.35, power: { fatigueResist: 0.15 } },
-            { id: 'g_aura', tab: 'gym', name: 'Gym Bro Aura', desc: 'Passively gain Rizz from lifting.', cost: { strength: 500, height: 20 }, multi: 1.50, power: { passRizz: 0.1 } },
+    let activeActivity = 'tall';
+    let cachedStats = {
+      clickPower: 0.1,
+      passiveGrowth: 0,
+      liftPower: 0,
+      jackyProd: 0,
+      fatigueResist: 0,
+      passJackys: 0
+    };
+    let lastTick = Date.now();
 
-            // Jackys (Costs Height or Jackys) - Buffed and Rebalanced
-            { id: 'j_nest', tab: 'jacky', name: 'Summon Jacky', desc: 'Spawn 1 Jacky. Needs Height.', cost: { height: 75 }, multi: 1.15, power: { jackys: 1 } },
-            { id: 'j_gym', tab: 'jacky', name: 'Jacky Treadmills', desc: 'Jackys produce 50% more base height.', cost: { jackys: 5 }, multi: 1.80, power: { jackyMulti: 0.5 } },
-            { id: 'j_clone', tab: 'jacky', name: 'Jacky Ring Lord', desc: 'Rapid passive Jacky deployment.', cost: { height: 8000, jackys: 10 }, multi: 1.35, power: { passJackys: 0.2 } },
-            { id: 'j_synergy', tab: 'jacky', name: 'Rizz Motivation', desc: 'Rizz boosts Jacky production heavily.', cost: { jackys: 20, rizz: 30 }, multi: 2.50, power: { rizzToJacky: 1 } },
-            { id: 'j_hive', tab: 'jacky', name: 'Hive Mind Overdrive', desc: 'Jackys now multiply passively.', cost: { jackys: 50 }, multi: 3.00, power: { passJackys: 1.0 } },
+    const milestones = [
+      { th: 1, name: "Visible to the naked eye", d: "You are no longer microscopic.", unlock: [] },
+      { th: 3, name: "Toddler menace", d: "You can reach the lower cabinet shelves.", unlock: ['lift'] },
+      { th: 5, name: "Average human unlocked", d: "You blend in with the middle schoolers.", unlock: ['talk', 'rizz_ui'] },
+      { th: 6, name: "Respectable king", d: "Tinder bios have legally opened up to you.", unlock: [] },
+      { th: 8, name: "Jacky Infestation", d: "Tiny bugs are gathering around you.", unlock: ['jackys'] },
+      { th: 10, name: "National emergency", d: "The government is tracking your movements.", unlock: [] },
+      { th: 25, name: "Suburban kaiju", d: "Roofs are scratching your knees.", unlock: [] },
+      { th: 50, name: "Skyline nuisance", d: "Godzilla asks for your routine.", unlock: [] }
+    ];
 
-            // Late Game (Growth)
-            { id: 'u_cyber', tab: 'growth', name: 'Cybernetic Fingers', desc: 'Massive click boost.', cost: { height: 75000 }, multi: 1.60, power: { clickHeight: 250.0 } },
-            { id: 'u_godhand', tab: 'growth', name: 'God Hand', desc: 'Unimaginable click power.', cost: { height: 1000000 }, multi: 2.00, power: { clickHeight: 5000.0 } }
-        ];
+    const upgradesList = [
+      { id: 'u_milk', tab: 'growth', name: 'Whole Milk Gallon', desc: '+0.5 Height/click.', cost: { height: 10 }, multi: 1.15, power: { clickHeight: 0.5 } },
+      { id: 'u_stretch', tab: 'growth', name: 'Suspicious Stretching', desc: '+1.0 Passive Height/s.', cost: { height: 50 }, multi: 1.25, power: { passHeight: 1.0 } },
+      { id: 'u_shoes', tab: 'growth', name: 'Platform Sneakers', desc: '+2.0 Height/click.', cost: { height: 150 }, multi: 1.20, power: { clickHeight: 2.0 } },
+      { id: 'u_nba', tab: 'growth', name: 'NBA Genetics', desc: 'Drastic gains: +5.0 pass, +3.0 click.', cost: { height: 1000 }, multi: 1.30, power: { passHeight: 5.0, clickHeight: 3.0 } },
+      { id: 'u_stilt', tab: 'growth', name: 'Titanium Stilts', desc: '+25.0 Height/click.', cost: { height: 5000 }, multi: 1.25, power: { clickHeight: 25.0 } },
+      { id: 'u_tall_prop', tab: 'growth', name: 'Tall Propaganda', desc: '+50.0 Passive Height/s. Boosts Ego.', cost: { height: 12000, reputation: 5 }, multi: 1.40, power: { passHeight: 50.0 } },
 
-        const achievementsList = [
-            { id: 'a_tall', name: 'Noticeable', desc: 'Reach 10 feet tall.', icon: '📏', condition: s => s.height >= 10 },
-            { id: 'a_giant', name: 'Traffic Hazard', desc: 'Reach 100 feet tall.', icon: '🏢', condition: s => s.height >= 100 },
-            { id: 'a_orbit', name: 'Low Earth Orbit', desc: 'Reach 100,000 feet tall.', icon: '🛰️', condition: s => s.height >= 100000 },
-            { id: 'a_lift', name: 'Built Different', desc: 'Gain 100 Strength.', icon: '💪', condition: s => s.strength >= 100 },
-            { id: 'a_aura', name: 'God Aura', desc: 'Gain 1,000 Strength.', icon: '🔥', condition: s => s.strength >= 1000 },
-            { id: 'a_infest', name: 'Payroll For Ants', desc: 'Employ 10 Jackys.', icon: '🐜', condition: s => s.jackys >= 10 },
-            { id: 'a_swarm', name: 'Knee-High Army', desc: 'Employ 50 Jackys.', icon: '🪖', condition: s => s.jackys >= 50 },
-            { id: 'a_rizz', name: 'Weirdly Confident', desc: 'Acquire 5 Rizz.', icon: '😎', condition: s => s.rizz >= 5 }
-        ];
+      { id: 'g_bench', tab: 'gym', name: 'Bench Press', desc: '+1 Strength/click.', cost: { strength: 10 }, multi: 1.20, power: { clickStrength: 1 } },
+      { id: 'g_pwr', tab: 'gym', name: 'Powerlifting Belt', desc: '+3 Strength/click.', cost: { strength: 60 }, multi: 1.25, power: { clickStrength: 3 } },
+      { id: 'g_creatine', tab: 'gym', name: 'Creatine Phase', desc: 'Reduces fatigue build-up.', cost: { strength: 200 }, multi: 1.35, power: { fatigueResist: 0.15 } },
+      { id: 'g_aura', tab: 'gym', name: 'Gym Bro Aura', desc: 'Passively gain Rizz from lifting.', cost: { strength: 500, height: 20 }, multi: 1.50, power: { passRizz: 0.1 } },
 
-        const flavorTexts = [
-            "Pauly is looking unusually short today.",
-            "A stiff breeze could knock Pauly over.",
-            "Posture check: F-",
-            "The grind never stops. Only pauses for snacks.",
-            "Drinking milk out of the carton.",
-            "Looking for elevator shoes on eBay."
-        ];
+      { id: 'j_nest', tab: 'jacky', name: 'Summon Jacky', desc: 'Spawn 1 Jacky. Needs Height.', cost: { height: 75 }, multi: 1.15, power: { jackys: 1 } },
+      { id: 'j_gym', tab: 'jacky', name: 'Jacky Treadmills', desc: 'Jackys produce 50% more base height.', cost: { jackys: 5 }, multi: 1.80, power: { jackyMulti: 0.5 } },
+      { id: 'j_clone', tab: 'jacky', name: 'Jacky Ring Lord', desc: 'Rapid passive Jacky deployment.', cost: { height: 8000, jackys: 10 }, multi: 1.35, power: { passJackys: 0.2 } },
+      { id: 'j_synergy', tab: 'jacky', name: 'Rizz Motivation', desc: 'Rizz boosts Jacky production heavily.', cost: { jackys: 20, rizz: 30 }, multi: 2.50, power: { rizzToJacky: 1 } },
+      { id: 'j_hive', tab: 'jacky', name: 'Hive Mind Overdrive', desc: 'Jackys now multiply passively.', cost: { jackys: 50 }, multi: 3.00, power: { passJackys: 1.0 } },
 
-        /* ================= INITIALIZATION ================= */
-        function init() {
-            // Guarantee upgrades object
-            upgradesList.forEach(u => {
-                if (state.upgrades[u.id] === undefined) state.upgrades[u.id] = 0;
-            });
+      { id: 'u_cyber', tab: 'growth', name: 'Cybernetic Fingers', desc: 'Massive click boost.', cost: { height: 75000 }, multi: 1.60, power: { clickHeight: 250.0 } },
+      { id: 'u_godhand', tab: 'growth', name: 'God Hand', desc: 'Unimaginable click power.', cost: { height: 1000000 }, multi: 2.00, power: { clickHeight: 5000.0 } }
+    ];
 
-            // Offline progress simple calc
-            const now = Date.now();
-            if (state.lastSaveTime) {
-                const diffSecs = (now - state.lastSaveTime) / 1000;
-                if (diffSecs > 60) {
-                    processOffline(diffSecs);
-                }
+    const achievementsList = [
+      { id: 'a_tall', name: 'Noticeable', desc: 'Reach 10 feet tall.', icon: '📏', condition: s => s.height >= 10 },
+      { id: 'a_giant', name: 'Traffic Hazard', desc: 'Reach 100 feet tall.', icon: '🏢', condition: s => s.height >= 100 },
+      { id: 'a_orbit', name: 'Low Earth Orbit', desc: 'Reach 100,000 feet tall.', icon: '🛰️', condition: s => s.height >= 100000 },
+      { id: 'a_lift', name: 'Built Different', desc: 'Gain 100 Strength.', icon: '💪', condition: s => s.strength >= 100 },
+      { id: 'a_aura', name: 'God Aura', desc: 'Gain 1,000 Strength.', icon: '🔥', condition: s => s.strength >= 1000 },
+      { id: 'a_infest', name: 'Payroll For Ants', desc: 'Employ 10 Jackys.', icon: '🐜', condition: s => s.jackys >= 10 },
+      { id: 'a_swarm', name: 'Knee-High Army', desc: 'Employ 50 Jackys.', icon: '🪖', condition: s => s.jackys >= 50 },
+      { id: 'a_rizz', name: 'Weirdly Confident', desc: 'Acquire 5 Rizz.', icon: '😎', condition: s => s.rizz >= 5 }
+    ];
+
+    const flavorTexts = [
+      "Pauly is looking unusually short today.",
+      "A stiff breeze could knock Pauly over.",
+      "Posture check: F-",
+      "The grind never stops. Only pauses for snacks.",
+      "Drinking milk out of the carton.",
+      "Looking for elevator shoes on eBay."
+    ];
+
+    function init() {
+      if (!state || typeof state !== 'object') {
+        state = JSON.parse(JSON.stringify(defaultState));
+      }
+
+      if (!state.upgrades) state.upgrades = {};
+      if (!state.milestones) state.milestones = [];
+      if (!state.achievements) state.achievements = {};
+
+      upgradesList.forEach(u => {
+        if (state.upgrades[u.id] === undefined) state.upgrades[u.id] = 0;
+      });
+
+      recalcStats();
+
+      const now = Date.now();
+      if (state.lastSaveTime) {
+        const diffSecs = (now - state.lastSaveTime) / 1000;
+        if (diffSecs > 60) {
+          processOffline(diffSecs);
+        }
+      }
+
+      recalcStats();
+      checkAchievements();
+      checkUnlocks();
+      buildShop();
+      updateUI();
+      updateJackyVisuals();
+
+      setInterval(tick, 100);
+      setInterval(saveGame, 5000);
+      setInterval(randomEvent, 45000);
+    }
+
+    function tick() {
+      const now = Date.now();
+      const delta = (now - lastTick) / 1000;
+      lastTick = now;
+
+      let gainedHeight = cachedStats.passiveGrowth * delta;
+      let jackyH = (state.jackys * cachedStats.jackyProd) * delta;
+      gainedHeight += jackyH;
+
+      if (activeActivity === 'lift') {
+        state.gymFatigue = Math.min(100, state.gymFatigue + (5 * delta * (1 - (cachedStats.fatigueResist || 0))));
+      } else {
+        state.gymFatigue = Math.max(0, state.gymFatigue - (10 * delta));
+      }
+
+      if (activeActivity !== 'talk') {
+        state.timeSinceTalk += delta;
+      } else {
+        state.timeSinceTalk = 0;
+      }
+
+      if (state.height > 30 && state.ego > 50) {
+        let decayRatio = (state.ego - 50) / 1000;
+        gainedHeight -= (state.height * decayRatio * delta);
+      }
+
+      if (state.timeSinceTalk > 120 && state.rizz > 0) {
+        state.rizz = Math.max(0, state.rizz - (0.5 * delta));
+      }
+
+      if (gainedHeight > 0) addHeight(gainedHeight);
+
+      if (cachedStats.passJackys) state.jackys += (cachedStats.passJackys * delta);
+
+      updateUI();
+    }
+
+    function recalcStats() {
+      let ch = 0.1;
+      let ph = 0;
+      let cs = 1;
+      let jm = 1;
+      let r2j = 0;
+      let fres = 0;
+      let pj = 0;
+
+      upgradesList.forEach(u => {
+        let count = state.upgrades[u.id] || 0;
+        if (count > 0 && u.power) {
+          if (u.power.clickHeight) ch += (u.power.clickHeight * count);
+          if (u.power.passHeight) ph += (u.power.passHeight * count);
+          if (u.power.clickStrength) cs += (u.power.clickStrength * count);
+          if (u.power.jackyMulti) jm += (u.power.jackyMulti * count);
+          if (u.power.fatigueResist) fres += (u.power.fatigueResist * count);
+          if (u.power.passJackys) pj += (u.power.passJackys * count);
+          if (u.power.rizzToJacky) r2j += (u.power.rizzToJacky * count);
+        }
+      });
+
+      let strMulti = 1 + (Math.floor(state.strength) / 100);
+
+      cachedStats.clickPower = ch * strMulti;
+      cachedStats.passiveGrowth = ph * strMulti;
+      cachedStats.liftPower = cs;
+
+      let rizzBonus = (r2j > 0) ? (1 + (Math.floor(state.rizz) / 10)) : 1;
+      cachedStats.jackyProd = 2.5 * jm * rizzBonus;
+
+      cachedStats.fatigueResist = Math.min(0.8, fres);
+      cachedStats.passJackys = pj;
+    }
+
+    function clickPauly(e) {
+      let popText = "";
+      let popClass = "";
+
+      if (activeActivity === 'tall') {
+        addHeight(cachedStats.clickPower);
+        popText = `+${formatNum(cachedStats.clickPower)}ft`;
+        popClass = "particle-taller";
+      } else if (activeActivity === 'lift') {
+        let fatigueMulti = state.gymFatigue > 80 ? 0.2 : (state.gymFatigue > 50 ? 0.5 : 1.0);
+        let gain = cachedStats.liftPower * fatigueMulti;
+        state.strength += gain;
+        if (fatigueMulti < 1.0 && Math.random() < 0.1) {
+          log("Gym fatigue settling in. Diminishing returns.", "fail");
+        }
+        popText = `+${formatNum(gain)} str`;
+        popClass = "particle-lift";
+        recalcStats();
+      } else if (activeActivity === 'talk') {
+        handleTalkAttempt();
+        popText = `💬`;
+        popClass = "particle-talk";
+      }
+
+      createParticle(e.clientX, e.clientY, popText, popClass);
+      animatePauly();
+      updateUI();
+      updateShopUI();
+      if (Math.random() < 0.05) changeFlavorText();
+    }
+
+    function setActivity(act) {
+      let btn = document.getElementById(`act-${act}`);
+      if (btn.classList.contains('locked')) return;
+
+      document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      let area = document.getElementById('click-circle');
+      area.className = `click-area active-${act}`;
+
+      activeActivity = act;
+      updateUI();
+      log(`Switched activity to: ${act.toUpperCase()}`, 'normal');
+    }
+
+    function handleTalkAttempt() {
+      state.girlsTalkedTo++;
+
+      let hFac = Math.min(40, state.height * 2);
+      let rFac = Math.min(40, state.rizz);
+      let sFac = Math.min(20, state.strength / 2);
+      let eFac = state.ego > 100 ? -20 : 0;
+
+      let baseChance = 5;
+      let chance = baseChance + hFac + rFac + sFac + eFac;
+      let roll = Math.random() * 100;
+
+      if (roll < chance) {
+        let rizzGain = state.height >= 6 ? (Math.floor(Math.random() * 3) + 2) : 1;
+        state.rizz += rizzGain;
+        state.reputation += 1;
+        state.ego += 0.5;
+        log(`Interaction Success! (+${rizzGain} Rizz)`, 'success');
+      } else {
+        let dmg = "";
+        if (state.ego > 10) {
+          state.ego -= 1;
+          dmg = "(-1 Ego)";
+        }
+        log(`Awkward silence... The moment passed. ${dmg}`, 'fail');
+      }
+    }
+
+    function addHeight(amt) {
+      state.height += amt;
+      checkMilestones();
+      checkUnlocks();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.upgrades-list').forEach(l => l.classList.remove('active'));
+
+      let btn = Array.from(document.querySelectorAll('.tab-btn')).find(b =>
+        (b.getAttribute('onclick') || '').includes(`'${tabId}'`)
+      );
+
+      if (btn) btn.classList.add('active');
+      const panel = document.getElementById(`shop-${tabId}`);
+      if (panel) panel.classList.add('active');
+    }
+
+    function buildShop() {
+      document.querySelectorAll('.upgrades-list').forEach(l => l.innerHTML = '');
+
+      upgradesList.forEach(u => {
+        let costHtml = '';
+        for (let k in u.cost) {
+          let cClass = `cost-${k}`;
+          costHtml += `<div class="upgrade-cost ${cClass}" id="cost-${u.id}-${k}">0 ${k}</div>`;
+        }
+
+        let html = `
+          <div class="upgrade-btn" id="btn-${u.id}" onclick="buyUpgrade('${u.id}')">
+            <div class="upgrade-count" id="count-${u.id}">${state.upgrades[u.id] || 0}</div>
+            <div class="upgrade-info">
+              <span class="upgrade-name">${u.name}</span>
+              <span class="upgrade-desc">${u.desc}</span>
+            </div>
+            <div class="upgrade-cost-box">${costHtml}</div>
+          </div>
+        `;
+        const target = document.getElementById(`shop-${u.tab}`);
+        if (target) target.insertAdjacentHTML('beforeend', html);
+      });
+
+      buildAchievementsPanel();
+      updateShopUI();
+    }
+
+    function buildAchievementsPanel() {
+      let container = document.getElementById('shop-achievements');
+      if (!container) return;
+      container.innerHTML = '';
+
+      achievementsList.forEach(a => {
+        let isUnlocked = !!state.achievements[a.id];
+        let titleColor = isUnlocked ? 'var(--accent-gold)' : 'var(--text-muted)';
+        let iconFilter = isUnlocked ? 'grayscale(0) opacity(1)' : 'grayscale(1) opacity(0.3)';
+
+        let html = `
+          <div class="achievement-item ${isUnlocked ? 'unlocked' : ''}" id="ach-panel-${a.id}">
+            <div class="ach-icon" style="filter:${iconFilter}">${a.icon}</div>
+            <div class="ach-details">
+              <h4 style="color:${titleColor};">${a.name}</h4>
+              <p>${isUnlocked ? a.desc : '???'}</p>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+      });
+    }
+
+    function updateShopUI() {
+      upgradesList.forEach(u => {
+        let count = state.upgrades[u.id] || 0;
+        let canAfford = true;
+
+        for (let k in u.cost) {
+          let rawCost = u.cost[k] * Math.pow(u.multi, count);
+          let costEl = document.getElementById(`cost-${u.id}-${k}`);
+          if (costEl) {
+            costEl.innerText = `${formatNum(rawCost)} ${k}`;
+            if ((state[k] || 0) < rawCost) canAfford = false;
+          }
+        }
+
+        let btn = document.getElementById(`btn-${u.id}`);
+        if (btn) {
+          btn.classList.toggle('locked', !canAfford);
+          const countEl = document.getElementById(`count-${u.id}`);
+          if (countEl) countEl.innerText = count;
+        }
+      });
+    }
+
+    function buyUpgrade(id) {
+      let u = upgradesList.find(x => x.id === id);
+      if (!u) return;
+
+      let canAfford = true;
+      let costs = {};
+      let count = state.upgrades[id] || 0;
+
+      for (let k in u.cost) {
+        costs[k] = u.cost[k] * Math.pow(u.multi, count);
+        if ((state[k] || 0) < costs[k]) canAfford = false;
+      }
+
+      if (!canAfford) return;
+
+      for (let k in costs) {
+        state[k] -= costs[k];
+      }
+
+      state.upgrades[id] = (state.upgrades[id] || 0) + 1;
+
+      if (u.id === 'j_nest') {
+        state.jackys += 1;
+        updateJackyVisuals();
+      }
+      if (u.id === 'u_tall_prop') {
+        state.ego += 10;
+      }
+
+      log(`Purchased ${u.name}!`, 'normal');
+      recalcStats();
+      updateShopUI();
+      updateUI();
+    }
+
+    function checkMilestones() {
+      for (let m of milestones) {
+        if (state.height >= m.th && !state.milestones.includes(m.th)) {
+          state.milestones.push(m.th);
+
+          m.unlock.forEach(unlockFlag => {
+            if (unlockFlag === 'lift') {
+              document.getElementById('act-lift').classList.remove('locked');
+              document.getElementById('tt-lift').style.display = 'none';
+              document.getElementById('prog-wrap-fatigue').style.display = 'block';
+              document.getElementById('box-strength').style.display = 'block';
+              document.getElementById('tab-gym').style.display = 'block';
+              log("UNLOCKED: The Gym Activity", "milestone");
             }
-
-            // Recalc cache
-            recalcStats();
-
-            // Background check
-            checkAchievements();
-            checkUnlocks();
-            buildShop();
-            updateUI();
-
-            // Gameloops
-            setInterval(tick, 100);
-            setInterval(saveGame, 5000);
-            setInterval(randomEvent, 45000);
-        }
-
-        // --- Core Loops ---
-        function tick() {
-            const now = Date.now();
-            const delta = (now - lastTick) / 1000;
-            lastTick = now;
-
-            // Passive Height Main
-            let gainedHeight = cachedStats.passiveGrowth * delta;
-
-            // Jackys production
-            let jackyH = (state.jackys * cachedStats.jackyProd) * delta;
-            gainedHeight += jackyH;
-
-            // Handle active activity background mechanics
-            if (activeActivity === 'lift') {
-                state.gymFatigue = Math.min(100, state.gymFatigue + (5 * delta * (1 - (cachedStats.fatigueResist || 0))));
-            } else {
-                state.gymFatigue = Math.max(0, state.gymFatigue - (10 * delta));
+            if (unlockFlag === 'talk') {
+              document.getElementById('act-talk').classList.remove('locked');
+              document.getElementById('tt-talk').style.display = 'none';
+              log("UNLOCKED: Talk to Girls Activity", "milestone");
             }
-
-            if (activeActivity !== 'talk') {
-                state.timeSinceTalk += delta;
-            } else {
-                state.timeSinceTalk = 0;
+            if (unlockFlag === 'rizz_ui') {
+              document.getElementById('box-rizz').style.display = 'block';
+              document.getElementById('box-reputation').style.display = 'block';
             }
-
-            // Decay Mechanics
-            // Height decay if very tall and ego is unchecked
-            if (state.height > 30 && state.ego > 50) {
-                let decayRatio = (state.ego - 50) / 1000; // 0.1% per tick roughly
-                gainedHeight -= (state.height * decayRatio * delta);
+            if (unlockFlag === 'jackys') {
+              document.getElementById('jacky-panel').style.display = 'block';
+              document.getElementById('tab-jacky').style.display = 'block';
+              log("UNLOCKED: Jacky Swarm", "milestone");
+              updateJackyVisuals();
             }
-            // Rizz decay if ignored girls for 2 minutes
-            if (state.timeSinceTalk > 120 && state.rizz > 0) {
-                state.rizz = Math.max(0, state.rizz - (0.5 * delta));
-            }
+          });
 
-            if (gainedHeight > 0) addHeight(gainedHeight);
-
-            // Passive Jacky gen
-            if (cachedStats.passJackys) state.jackys += (cachedStats.passJackys * delta);
-
-            updateUI();
+          document.getElementById('modal-name').innerText = m.name;
+          document.getElementById('modal-desc').innerText = m.d;
+          document.getElementById('milestone-modal').classList.add('show');
+          log(`MILESTONE: ${m.name}`, 'milestone');
         }
+      }
+    }
 
-        function recalcStats() {
-            let ch = 0.1; // Base click height
-            let ph = 0;   // Base passive height
-            let cs = 1;   // Base click strength
-            let jm = 1;   // Jacky multiplier
-            let r2j = 0;  // Rizz to Jacky Synergy
-            let fres = 0; // Fatigue resist
-            let pj = 0;   // Passive Jacky gen
+    function checkUnlocks() {
+      if (state.height >= 3 || state.milestones.includes(3)) {
+        document.getElementById('act-lift').classList.remove('locked');
+        document.getElementById('box-strength').style.display = 'block';
+        document.getElementById('tab-gym').style.display = 'block';
+        document.getElementById('prog-wrap-fatigue').style.display = 'block';
+      }
+      if (state.height >= 5 || state.strength >= 20 || state.milestones.includes(5)) {
+        document.getElementById('act-talk').classList.remove('locked');
+        document.getElementById('box-rizz').style.display = 'block';
+        document.getElementById('box-reputation').style.display = 'block';
+      }
+      if (state.height >= 8 || state.milestones.includes(8)) {
+        document.getElementById('jacky-panel').style.display = 'block';
+        document.getElementById('tab-jacky').style.display = 'block';
+        updateJackyVisuals();
+      }
+    }
 
-            upgradesList.forEach(u => {
-                let count = state.upgrades[u.id];
-                if (count > 0 && u.power) {
-                    if (u.power.clickHeight) ch += (u.power.clickHeight * count);
-                    if (u.power.passHeight) ph += (u.power.passHeight * count);
-                    if (u.power.clickStrength) cs += (u.power.clickStrength * count);
-                    if (u.power.jackyMulti) jm += (u.power.jackyMulti * count);
-                    if (u.power.fatigueResist) fres += (u.power.fatigueResist * count);
-                    if (u.power.passJackys) pj += (u.power.passJackys * count);
-                    if (u.power.rizzToJacky) r2j += (u.power.rizzToJacky * count);
-                }
-            });
+    function updateJackyVisuals() {
+      const container = document.getElementById('orbit-swarm');
+      if (!container) return;
 
-            // Strength boosts height multiplier (1% per point)
-            let strMulti = 1 + (Math.floor(state.strength) / 100);
+      const jCount = Math.floor(state.jackys);
+      const visualCount = Math.min(50, jCount);
 
-            cachedStats.clickPower = ch * strMulti;
-            cachedStats.passiveGrowth = ph * strMulti;
-            cachedStats.liftPower = cs; // FIXED STRENGTH BUG
+      if (container.children.length === visualCount) return;
 
-            // Massively Buffed Jacky Production
-            let rizzBonus = (r2j > 0) ? (1 + (Math.floor(state.rizz) / 10)) : 1;
-            cachedStats.jackyProd = 2.5 * jm * rizzBonus;
+      container.innerHTML = '';
+      container.style.animation = 'rotateOrbit 15s linear infinite';
 
-            cachedStats.fatigueResist = Math.min(0.8, fres);
-            cachedStats.passJackys = pj;
+      for (let i = 0; i < visualCount; i++) {
+        const j = document.createElement('div');
+        j.className = 'orbit-jacky';
+
+        const angle = (i / Math.max(visualCount, 1)) * (2 * Math.PI);
+        const radius = 220;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+
+        j.style.left = x + 'px';
+        j.style.top = y + 'px';
+        j.style.animationDelay = `-${Math.random() * 15}s`;
+
+        container.appendChild(j);
+      }
+    }
+
+    function updateUI() {
+      document.getElementById('val-height').innerText = formatNum(state.height) + ' ft';
+      document.getElementById('val-strength').innerText = formatNum(state.strength);
+      document.getElementById('val-rizz').innerText = formatNum(state.rizz);
+      document.getElementById('val-ego').innerText = formatNum(state.ego);
+      document.getElementById('val-rep').innerText = formatNum(state.reputation);
+      document.getElementById('val-jackys').innerText = formatNum(state.jackys);
+
+      let hEl = document.getElementById('val-height');
+      hEl.classList.toggle('decay', state.height > 30 && state.ego > 50);
+
+      document.getElementById('val-clickpwr').innerText =
+        formatNum(activeActivity === 'tall' ? cachedStats.clickPower : (activeActivity === 'lift' ? cachedStats.liftPower : 0));
+      document.getElementById('val-passive').innerText =
+        formatNum(cachedStats.passiveGrowth + (state.jackys * cachedStats.jackyProd)) + '/s';
+
+      document.getElementById('jacky-prod').innerText =
+        `Gen: ${formatNum(state.jackys * cachedStats.jackyProd)} height/s`;
+
+      let nextM = milestones.find(m => m.th > state.height);
+      let prevM = milestones.slice().reverse().find(m => m.th <= state.height) || { th: 0 };
+      const pBarH = document.querySelector('#prog-height .progress-bar');
+
+      if (nextM) {
+        let rng = nextM.th - prevM.th;
+        let cur = state.height - prevM.th;
+        let pct = (cur / rng) * 100;
+        pBarH.style.width = Math.min(100, pct) + '%';
+        document.getElementById('prog-text').innerText = `Next: ${nextM.th} ft`;
+      } else {
+        pBarH.style.width = '100%';
+        document.getElementById('prog-text').innerText = `GODLIKE`;
+      }
+
+      document.querySelector('#prog-fatigue .progress-bar').style.width = state.gymFatigue + '%';
+      document.getElementById('prog-text-fatigue').innerText = Math.floor(state.gymFatigue) + '%';
+
+      updateShopUI();
+      checkPaulyEvolution();
+    }
+
+    function checkPaulyEvolution() {
+      let targetSrc = 'pauly.png';
+
+      if (document.body.innerText.includes("67")) {
+        targetSrc = 'pauly3.png';
+      } else if (state.height >= 100000000) {
+        targetSrc = 'pauly4.png';
+      } else if (state.strength >= 10000) {
+        targetSrc = 'pauly2.png';
+      } else if (state.height >= 100000) {
+        targetSrc = 'pauly1.png';
+      }
+
+      let img = document.getElementById('pauly-img');
+      if (img && !img.src.endsWith(targetSrc)) {
+        img.src = targetSrc;
+      }
+    }
+
+    function checkAchievements() {
+      if (!state.achievements) state.achievements = {};
+
+      let newlyUnlocked = false;
+      achievementsList.forEach(a => {
+        if (!state.achievements[a.id] && a.condition(state)) {
+          state.achievements[a.id] = true;
+          newlyUnlocked = true;
+          showAchievementToast(a);
         }
+      });
 
-        // --- Interaction ---
-        function clickPauly(e) {
-            let popText = "";
-            let popClass = "";
+      if (newlyUnlocked) buildAchievementsPanel();
+    }
 
-            if (activeActivity === 'tall') {
-                addHeight(cachedStats.clickPower);
-                popText = `+${formatNum(cachedStats.clickPower)}ft`;
-                popClass = "particle-taller";
-            }
-            else if (activeActivity === 'lift') {
-                // Diminishing returns from fatigue
-                let fatigueMulti = state.gymFatigue > 80 ? 0.2 : (state.gymFatigue > 50 ? 0.5 : 1.0);
-                let gain = cachedStats.liftPower * fatigueMulti;
-                state.strength += gain;
-                if (fatigueMulti < 1.0) {
-                    if (Math.random() < 0.1) log("Gym fatigue settling in. Diminishing returns.", "fail");
-                }
-                popText = `+${formatNum(gain)} str`;
-                popClass = "particle-lift";
-                recalcStats();
-            }
-            else if (activeActivity === 'talk') {
-                handleTalkAttempt();
-                popText = `💬`;
-                popClass = "particle-talk";
-            }
+    function showAchievementToast(ach) {
+      let container = document.getElementById('toast-container');
+      let toast = document.createElement('div');
+      toast.className = 'toast-popup';
+      toast.innerHTML = `<strong>🏆 Achievement Unlocked</strong> ${ach.icon} ${ach.name}`;
+      container.appendChild(toast);
 
-            // Visuals
-            createParticle(e.clientX, e.clientY, popText, popClass);
-            animatePauly();
-            updateUI();
-            updateShopUI(); // check costs
-            if (Math.random() < 0.05) changeFlavorText();
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 4500);
+    }
+
+    function createParticle(x, y, text, pClass) {
+      const el = document.createElement('div');
+      el.className = `click-particle ${pClass}`;
+      el.innerText = text;
+      const offX = (Math.random() - 0.5) * 50;
+      const offY = (Math.random() - 0.5) * 50;
+      el.style.left = (x + offX - 25) + 'px';
+      el.style.top = (y + offY - 25) + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 800);
+    }
+
+    function animatePauly() {
+      const img = document.getElementById('pauly-img');
+      let sc = 1 + (state.height / 500);
+      img.style.transform = `scale(${Math.min(1.4, sc + 0.05)})`;
+      setTimeout(() => {
+        img.style.transform = `scale(${Math.min(1.3, sc)})`;
+      }, 100);
+    }
+
+    function changeFlavorText() {
+      document.getElementById('flavor-text').innerText =
+        flavorTexts[Math.floor(Math.random() * flavorTexts.length)];
+    }
+
+    function randomEvent() {
+      const events = [
+        { req: 'base', msg: "An uncle claimed he used to be taller.", type: "normal" },
+        { req: 'base', msg: "Posture police issued a warning.", type: "bad" },
+        { req: 'lift', msg: "A literal gym bro said 'I see potential'.", type: "success", ef: () => state.strength += 5 },
+        { req: 'jacky', msg: "A rogue Jacky started a side hustle.", type: "jacky", ef: () => state.height += 50 },
+        { req: 'ego', msg: "Public confidence scandal! Ego crashed.", type: "bad", ef: () => { state.ego = Math.max(0, state.ego / 2); state.reputation -= 5; } }
+      ];
+
+      let valid = events.filter(e => {
+        if (e.req === 'base') return true;
+        if (e.req === 'lift' && state.milestones.includes(3)) return true;
+        if (e.req === 'jacky' && state.jackys > 0) return true;
+        if (e.req === 'ego' && state.ego > 20) return true;
+        return false;
+      });
+
+      if (valid.length > 0) {
+        let ev = valid[Math.floor(Math.random() * valid.length)];
+        log(`EVENT: ${ev.msg}`, ev.type);
+        if (ev.ef) ev.ef();
+        updateUI();
+      }
+    }
+
+    function log(msg, type = 'normal') {
+      const l = document.getElementById('event-log');
+      const e = document.createElement('div');
+      e.className = `log-entry ${type}`;
+      const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      e.innerText = `[${t}] ${msg}`;
+      l.appendChild(e);
+      l.scrollTop = l.scrollHeight;
+      if (l.children.length > 30) l.removeChild(l.firstChild);
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    function localStoreGet(key) {
+      try { return localStorage.getItem(key); } catch (e) { return null; }
+    }
+
+    function saveGame() {
+      state.lastSaveTime = Date.now();
+      try { localStorage.setItem('pauly_save', JSON.stringify(state)); } catch (e) {}
+    }
+
+    function hardReset() {
+      if (confirm("Factory Reset Pauly? All data will be lost forever.")) {
+        state = JSON.parse(JSON.stringify(defaultState));
+        saveGame();
+        location.reload();
+      }
+    }
+
+    function exportSave() {
+      prompt("Copy this text:", btoa(JSON.stringify(state)));
+    }
+
+    function importSave() {
+      let str = prompt("Paste save string:");
+      if (str) {
+        try {
+          state = JSON.parse(atob(str));
+          if (!state.upgrades) state.upgrades = {};
+          if (!state.milestones) state.milestones = [];
+          if (!state.achievements) state.achievements = {};
+          saveGame();
+          location.reload();
+        } catch (e) {
+          alert("Invalid save string!");
         }
-
-        function setActivity(act) {
-            // Check unlocks via button classes
-            let btn = document.getElementById(`act-${act}`);
-            if (btn.classList.contains('locked')) return;
-
-            document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            let area = document.getElementById('click-circle');
-            area.className = `click-area active-${act}`;
-
-            activeActivity = act;
-            updateUI();
-            log(`Switched activity to: ${act.toUpperCase()}`, 'normal');
-        }
-
-        function handleTalkAttempt() {
-            state.girlsTalkedTo++;
-            // Success chance formula
-            // Height contributes up to 40%, Rizz up to 40%, Strength up to 20%
-            let hFac = Math.min(40, state.height * 2);
-            let rFac = Math.min(40, state.rizz);
-            let sFac = Math.min(20, state.strength / 2);
-            let eFac = state.ego > 100 ? -20 : 0; // High ego penalty
-
-            let baseChance = 5; // always 5%
-            let chance = baseChance + hFac + rFac + sFac + eFac;
-            let roll = Math.random() * 100;
-
-            if (roll < chance) {
-                // Success
-                let rizzGain = state.height >= 6 ? (Math.floor(Math.random() * 3) + 2) : 1;
-                state.rizz += rizzGain;
-                state.reputation += 1;
-                state.ego += 0.5; // Success breeds ego
-                log(`Interaction Success! (+${rizzGain} Rizz)`, 'success');
-            } else {
-                // Fail
-                let dmg = "";
-                if (state.ego > 10) { state.ego -= 1; dmg = "(-1 Ego)"; }
-                log(`Awkward silence... The moment passed. ${dmg}`, 'fail');
-            }
-        }
-
-        function addHeight(amt) {
-            state.height += amt;
-            checkMilestones();
-            checkUnlocks();
-        }
-
-        // --- Shop & Upgrades ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.upgrades-list').forEach(l => l.classList.remove('active'));
-
-            let btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.textContent.toLowerCase().includes(tabId));
-            if (btn) btn.classList.add('active');
-            document.getElementById(`shop-${tabId}`).classList.add('active');
-        }
-
-        function buildShop() {
-            document.querySelectorAll('.upgrades-list').forEach(l => l.innerHTML = '');
-
-            upgradesList.forEach(u => {
-                let costHtml = '';
-                for (let k in u.cost) {
-                    let cClass = `cost-${k}`;
-                    costHtml += `<div class="upgrade-cost ${cClass}" id="cost-${u.id}-${k}">0 ${k}</div>`;
-                }
-
-                let html = `
-                    <div class="upgrade-btn" id="btn-${u.id}" onclick="buyUpgrade('${u.id}')">
-                        <div class="upgrade-count" id="count-${u.id}">${state.upgrades[u.id]}</div>
-                        <div class="upgrade-info">
-                            <span class="upgrade-name">${u.name}</span>
-                            <span class="upgrade-desc">${u.desc}</span>
-                        </div>
-                        <div class="upgrade-cost-box">${costHtml}</div>
-                    </div>
-                `;
-                document.getElementById(`shop-${u.tab}`).insertAdjacentHTML('beforeend', html);
-            });
-
-            // Build Achievements Panel
-            buildAchievementsPanel();
-        }
-
-        function buildAchievementsPanel() {
-            let container = document.getElementById('shop-achievements');
-            container.innerHTML = '';
-
-            achievementsList.forEach(a => {
-                let isUnlocked = state.achievements[a.id];
-                let titleColor = isUnlocked ? 'var(--accent-gold)' : 'var(--text-muted)';
-                let iconFilter = isUnlocked ? 'grayscale(0) opacity(1)' : 'grayscale(1) opacity(0.3)';
-
-                let html = `
-                    <div class="achievement-item ${isUnlocked ? 'unlocked' : ''}" id="ach-panel-${a.id}">
-                        <div class="ach-icon" style="filter: ${iconFilter}">${a.icon}</div>
-                        <div class="ach-details">
-                            <h4 style="color: ${titleColor};">${a.name}</h4>
-                            <p>${isUnlocked ? a.desc : '???'}</p>
-                        </div>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', html);
-            });
-        }
-
-        function updateShopUI() {
-            upgradesList.forEach(u => {
-                let count = state.upgrades[u.id];
-                let canAfford = true;
-
-                // Special Override for Jacky Nest causing recursive state tracking, make it cost height but yield jackys
-                for (let k in u.cost) {
-                    let rawCost = u.cost[k] * Math.pow(u.multi, count);
-                    let costEl = document.getElementById(`cost-${u.id}-${k}`);
-                    if (costEl) {
-                        costEl.innerText = `${formatNum(rawCost)} ${k}`;
-                        // Check if player has enough state[k]
-                        if ((state[k] || 0) < rawCost) canAfford = false;
-                    }
-                }
-
-                let btn = document.getElementById(`btn-${u.id}`);
-                if (btn) {
-                    if (canAfford) btn.classList.remove('locked');
-                    else btn.classList.add('locked');
-                    document.getElementById(`count-${u.id}`).innerText = count;
-                }
-            });
-        }
-
-        function buyUpgrade(id) {
-            let u = upgradesList.find(x => x.id === id);
-            if (!u) return;
-
-            // Verify cost
-            let canAfford = true;
-            let costs = {};
-            let count = state.upgrades[id];
-
-            for (let k in u.cost) {
-                costs[k] = u.cost[k] * Math.pow(u.multi, count);
-                if ((state[k] || 0) < costs[k]) canAfford = false;
-            }
-
-            if (canAfford) {
-                // Deduct
-                for (let k in costs) { state[k] -= costs[k]; }
-
-                // Add Upgrade
-                state.upgrades[id]++;
-
-                // Specific direct injects (like j_nest gives raw flat jackys outside of recalc)
-                if (u.id === 'j_nest') { state.jackys += 1; updateJackyVisuals(); }
-                if (u.id === 'u_tall_prop') { state.ego += 10; }
-
-                log(`Purchased ${u.name}!`, 'normal');
-                recalcStats();
-                updateShopUI();
-                updateUI();
-            }
-        }
-
-        // --- Milestone & Unlocks ---
-        function checkMilestones() {
-            for (let m of milestones) {
-                if (state.height >= m.th && !state.milestones.includes(m.th)) {
-                    state.milestones.push(m.th);
-
-                    // Handle Unlocks
-                    m.unlock.forEach(unlockFlag => {
-                        if (unlockFlag === 'lift') {
-                            document.getElementById('act-lift').classList.remove('locked');
-                            document.getElementById('tt-lift').style.display = 'none';
-                            document.getElementById('prog-wrap-fatigue').style.display = 'block';
-                            document.getElementById('box-strength').style.display = 'block';
-                            document.getElementById('tab-gym').style.display = 'block';
-                            log("UNLOCKED: The Gym Activity", "milestone");
-                        }
-                        if (unlockFlag === 'talk') {
-                            document.getElementById('act-talk').classList.remove('locked');
-                            document.getElementById('tt-talk').style.display = 'none';
-                            log("UNLOCKED: Talk to Girls Activity", "milestone");
-                        }
-                        if (unlockFlag === 'rizz_ui') {
-                            document.getElementById('box-rizz').style.display = 'block';
-                            document.getElementById('box-reputation').style.display = 'block';
-                        }
-                        if (unlockFlag === 'jackys') {
-                            document.getElementById('jacky-panel').style.display = 'block';
-                            document.getElementById('tab-jacky').style.display = 'block';
-                            log("UNLOCKED: Jacky Swarm", "milestone");
-                            updateJackyVisuals();
-                        }
-                    });
-
-                    // Modals
-                    document.getElementById('modal-name').innerText = m.name;
-                    document.getElementById('modal-desc').innerText = m.d;
-                    document.getElementById('milestone-modal').classList.add('show');
-                    log(`MILESTONE: ${m.name}`, 'milestone');
-                }
-            }
-        }
-
-        // Catchup on reload
-        function checkUnlocks() {
-            if (state.height >= 3 || state.milestones.includes(3)) {
-                document.getElementById('act-lift').classList.remove('locked');
-                document.getElementById('box-strength').style.display = 'block';
-                document.getElementById('tab-gym').style.display = 'block';
-                document.getElementById('prog-wrap-fatigue').style.display = 'block';
-            }
-            if (state.height >= 5 || state.strength >= 20 || state.milestones.includes(5)) {
-                document.getElementById('act-talk').classList.remove('locked');
-                document.getElementById('box-rizz').style.display = 'block';
-                document.getElementById('box-reputation').style.display = 'block';
-            }
-            if (state.height >= 8 || state.milestones.includes(8)) {
-                document.getElementById('jacky-panel').style.display = 'block';
-                document.getElementById('tab-jacky').style.display = 'block';
-                updateJackyVisuals();
-            }
-        }
-
-        function updateJackyVisuals() {
-            let container = document.getElementById('orbit-swarm');
-            if (!container) return;
-            let jCount = Math.floor(state.jackys);
-            let visualCount = Math.min(50, jCount); // cap dom elements slightly higher
-
-            // If the count hasn't changed, don't re-render everything to prevent lag
-            if (container.children.length === visualCount) return;
-
-            // Clear and rebuild for perfect synchronized ring distribution
-            container.innerHTML = '';
-
-            // Add central rotation animation to wrapper
-            container.style.animation = `rotateOrbit 15s linear infinite`;
-
-            for (let i = 0; i < visualCount; i++) {
-                let j = document.createElement('div');
-                j.className = 'orbit-jacky';
-
-                // Perfect mathematical circle spacing
-                let angle = (i / visualCount) * (2 * Math.PI);
-                let radius = 220; // Perfect, tight premium ring
-
-                let x = Math.cos(angle) * radius;
-                let y = Math.sin(angle) * radius;
-
-                j.style.left = x + 'px';
-                j.style.top = y + 'px';
-
-                // Counter rotate so they stay upright
-                j.style.animation = `rotateOrbitRev 15s linear infinite`;
-
-                // Add staggered popping animation
-                j.style.animationDelay = `-${Math.random() * 15}s`;
-
-                // Periodic clicking animation
-                setInterval(() => {
-                    if (Math.random() < 0.15) {
-                        j.style.transform = 'scale(1.4)';
-                        j.style.filter = 'drop-shadow(0 6px 12px var(--secondary-dark)) brightness(1.5)';
-                        setTimeout(() => {
-                            j.style.transform = 'scale(1)';
-                            j.style.filter = 'drop-shadow(0 4px 6px rgba(0,0,0,0.8))';
-                        }, 250);
-                    }
-                }, 1000 + Math.random() * 2000);
-
-                container.appendChild(j);
-            }
-        }
-
-        // --- Visuals & Output ---
-        function updateUI() {
-            // Stats
-            document.getElementById('val-height').innerText = formatNum(state.height) + ' ft';
-            document.getElementById('val-strength').innerText = formatNum(state.strength);
-            document.getElementById('val-rizz').innerText = formatNum(state.rizz);
-            document.getElementById('val-ego').innerText = formatNum(state.ego);
-            document.getElementById('val-rep').innerText = formatNum(state.reputation);
-            document.getElementById('val-jackys').innerText = formatNum(state.jackys);
-
-            // Warnings
-            let hEl = document.getElementById('val-height');
-            if (state.height > 30 && state.ego > 50) hEl.classList.add('decay');
-            else hEl.classList.remove('decay');
-
-            // Bottom display
-            document.getElementById('val-clickpwr').innerText = formatNum(activeActivity === 'tall' ? cachedStats.clickPower : (activeActivity === 'lift' ? cachedStats.liftPower : 0));
-            document.getElementById('val-passive').innerText = formatNum(cachedStats.passiveGrowth + (state.jackys * cachedStats.jackyProd)) + '/s';
-
-            document.getElementById('jacky-prod').innerText = `Gen: ${formatNum(state.jackys * cachedStats.jackyProd)} height/s`;
-
-            // Progress Bar Height
-            let nextM = milestones.find(m => m.th > state.height);
-            let prevM = milestones.slice().reverse().find(m => m.th <= state.height) || { th: 0 };
-            const pBarH = document.querySelector('#prog-height .progress-bar');
-
-            if (nextM) {
-                let rng = nextM.th - prevM.th;
-                let cur = state.height - prevM.th;
-                let pct = (cur / rng) * 100;
-                pBarH.style.width = Math.min(100, pct) + '%';
-                document.getElementById('prog-text').innerText = `Next: ${nextM.th} ft`;
-            } else {
-                pBarH.style.width = '100%';
-                document.getElementById('prog-text').innerText = `GODLIKE`;
-            }
-
-            // Progress Bar Fatigue
-            document.querySelector('#prog-fatigue .progress-bar').style.width = state.gymFatigue + '%';
-            document.getElementById('prog-text-fatigue').innerText = Math.floor(state.gymFatigue) + '%';
-
-            updateShopUI();
-            checkPaulyEvolution();
-        }
-
-        function checkPaulyEvolution() {
-            let targetSrc = 'pauly.png'; // Default
-
-            // Priority hierarchy
-            if (document.body.innerText.includes("67")) {
-                targetSrc = 'pauly3.png'; // God Mode Pauly
-            } else if (state.height >= 100000000) {
-                targetSrc = 'pauly4.png'; // True Height Master Pauly (100M+)
-            } else if (state.strength >= 10000) {
-                targetSrc = 'pauly2.png'; // Flame Muscular Pauly
-            } else if (state.height >= 100000) {
-                targetSrc = 'pauly1.png'; // King Pauly (100k+)
-            }
-
-            let img = document.getElementById('pauly-img');
-            if (img && !img.src.endsWith(targetSrc)) {
-                img.src = targetSrc;
-            }
-        }
-
-        function checkAchievements() {
-            let newlyUnlocked = false;
-            achievementsList.forEach(a => {
-                if (!state.achievements[a.id]) {
-                    if (a.condition(state)) {
-                        state.achievements[a.id] = true;
-                        newlyUnlocked = true;
-                        showAchievementToast(a);
-                    }
-                }
-            });
-            if (newlyUnlocked) buildAchievementsPanel();
-        }
-
-        function showAchievementToast(ach) {
-            let container = document.getElementById('toast-container');
-            let toast = document.createElement('div');
-            toast.className = 'toast-popup';
-            toast.innerHTML = `<strong>🏆 Achievement Unlocked</strong> ${ach.icon} ${ach.name}`;
-            container.appendChild(toast);
-
-            // Remove after animation completes
-            setTimeout(() => {
-                if (toast.parentNode) toast.parentNode.removeChild(toast);
-            }, 4500);
-        }
-
-        function createParticle(x, y, text, pClass) {
-            const el = document.createElement('div');
-            el.className = `click-particle ${pClass}`;
-            el.innerText = text;
-            const offX = (Math.random() - 0.5) * 50;
-            const offY = (Math.random() - 0.5) * 50;
-            el.style.left = (x + offX - 25) + 'px';
-            el.style.top = (y + offY - 25) + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
-        }
-
-        function animatePauly() {
-            const img = document.getElementById('pauly-img');
-            let sc = 1 + (state.height / 500); // base scale growth
-            img.style.transform = `scale(${Math.min(1.4, sc + 0.05)})`;
-            setTimeout(() => { img.style.transform = `scale(${Math.min(1.3, sc)})`; }, 100);
-        }
-
-        function changeFlavorText() {
-            document.getElementById('flavor-text').innerText = flavorTexts[Math.floor(Math.random() * flavorTexts.length)];
-        }
-
-        function randomEvent() {
-            const events = [
-                { req: 'base', msg: "An uncle claimed he used to be taller.", type: "normal" },
-                { req: 'base', msg: "Posture police issued a warning.", type: "bad" },
-                { req: 'lift', msg: "A literal gym bro said 'I see potential'.", type: "success", ef: () => state.strength += 5 },
-                { req: 'jacky', msg: "A rogue Jacky started a side hustle.", type: "jacky", ef: () => state.height += 50 },
-                { req: 'ego', msg: "Public confidence scandal! Ego crashed.", type: "bad", ef: () => { state.ego = Math.max(0, state.ego / 2); state.reputation -= 5; } }
-            ];
-
-            let valid = events.filter(e => {
-                if (e.req === 'base') return true;
-                if (e.req === 'lift' && state.milestones.includes(3)) return true;
-                if (e.req === 'jacky' && state.jackys > 0) return true;
-                if (e.req === 'ego' && state.ego > 20) return true;
-                return false;
-            });
-
-            if (valid.length > 0) {
-                let ev = valid[Math.floor(Math.random() * valid.length)];
-                log(`EVENT: ${ev.msg}`, ev.type);
-                if (ev.ef) ev.ef();
-                updateUI();
-            }
-        }
-
-        function log(msg, type = 'normal') {
-            const l = document.getElementById('event-log');
-            const e = document.createElement('div');
-            e.className = `log-entry ${type}`;
-            const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            e.innerText = `[${t}] ${msg}`;
-            l.appendChild(e);
-            l.scrollTop = l.scrollHeight;
-            if (l.children.length > 30) l.removeChild(l.firstChild);
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
-
-        // --- Save System Utils ---
-        function localStoreGet(key) {
-            try { return localStorage.getItem(key); } catch (e) { return null; }
-        }
-        function saveGame() {
-            state.lastSaveTime = Date.now();
-            try { localStorage.setItem('pauly_save', JSON.stringify(state)); } catch (e) { }
-        }
-        function hardReset() {
-            if (confirm("Factory Reset Pauly? All data will be lost forever.")) {
-                state = JSON.parse(JSON.stringify(defaultState));
-                saveGame();
-                location.reload();
-            }
-        }
-        function exportSave() {
-            prompt("Copy this text:", btoa(JSON.stringify(state)));
-        }
-        function importSave() {
-            let str = prompt("Paste save string:");
-            if (str) {
-                try {
-                    state = JSON.parse(atob(str));
-                    saveGame();
-                    location.reload();
-                } catch (e) { alert("Invalid save string!"); }
-            }
-        }
-        function processOffline(secs) {
-            let limit = Math.min(secs, 86400 * 3); // max 3 days
-            let gains = (cachedStats.passiveGrowth + (state.jackys * cachedStats.jackyProd)) * limit;
-            if (gains > 0) {
-                addHeight(gains);
-                log(`Offline Progress! Gained ${formatNum(gains)} ft over ${formatNum(limit / 3600)} hours.`, 'success');
-            }
-        }
-
-        function formatNum(num) {
-            if (isNaN(num)) return "0.0";
-            if (num >= 1000000) return (num / 1000000).toFixed(2) + "M";
-            if (num >= 1000) return (num / 1000).toFixed(2) + "K";
-            return num.toFixed(1);
-        }
-
-        // Bootstrap
-        window.addEventListener('DOMContentLoaded', init);
-    </script>
+      }
+    }
+
+    function processOffline(secs) {
+      let limit = Math.min(secs, 86400 * 3);
+      let gains = (cachedStats.passiveGrowth + (state.jackys * cachedStats.jackyProd)) * limit;
+      if (gains > 0) {
+        addHeight(gains);
+        log(`Offline Progress! Gained ${formatNum(gains)} ft over ${formatNum(limit / 3600)} hours.`, 'success');
+      }
+    }
+
+    function formatNum(num) {
+      if (isNaN(num)) return "0.0";
+      if (num >= 1000000) return (num / 1000000).toFixed(2) + "M";
+      if (num >= 1000) return (num / 1000).toFixed(2) + "K";
+      return Number(num).toFixed(1);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
-
 </html>
