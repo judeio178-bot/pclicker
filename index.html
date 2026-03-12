@@ -277,8 +277,8 @@
         }
 
         #pauly-img {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 65%;
+            max-height: 65%;
             object-fit: contain;
             filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.6));
             pointer-events: none;
@@ -582,13 +582,13 @@
 
         .orbit-jacky {
             position: absolute;
-            width: 24px;
-            height: 24px;
-            margin-top: -12px;
-            margin-left: -12px;
+            width: 64px;
+            height: 64px;
+            margin-top: -32px;
+            margin-left: -32px;
             background-image: url('jacky.png');
             background-size: cover;
-            filter: drop-shadow(0 2px 4px #000);
+            filter: drop-shadow(0 4px 8px #000);
             transition: transform 0.1s, filter 0.1s;
         }
 
@@ -891,7 +891,7 @@
 
             <div class="click-area active-taller" id="click-circle" onclick="clickPauly(event)">
                 <div id="orbit-swarm"></div>
-                <img src="pauly1.png" id="pauly-img" alt="Pauly"
+                <img src="pauly.png" id="pauly-img" alt="Pauly"
                     onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><circle cx=\'100\' cy=\'100\' r=\'100\' fill=\'%2357606f\'/><text x=\'50%\' y=\'50%\' font-family=\'sans-serif\' font-size=\'20\' fill=\'white\' text-anchor=\'middle\' dy=\'.3em\'>Pauly</text></svg>'">
             </div>
 
@@ -1018,9 +1018,9 @@
             { id: 'g_aura', tab: 'gym', name: 'Gym Bro Aura', desc: 'Passively gain Rizz from lifting.', cost: { strength: 200, height: 6 }, multi: 1.8, power: { passRizz: 0.1 } },
 
             // Jackys (Costs Height or Jackys)
-            { id: 'j_nest', tab: 'jacky', name: 'Jacky Nest', desc: 'Spawn 1 Jacky. Costs Height.', cost: { height: 50 }, multi: 1.2, power: { jackys: 1 } }, /* Special handled cost */
-            { id: 'j_gym', tab: 'jacky', name: 'Jacky Treadmills', desc: 'Jackys produce 50% more.', cost: { jackys: 10 }, multi: 2, power: { jackyMulti: 0.5 } },
-            { id: 'j_clone', tab: 'jacky', name: 'Clone Vat', desc: 'Rapid Jacky deployment.', cost: { height: 5000, jackys: 50 }, multi: 1.5, power: { passJackys: 0.1 } }
+            { id: 'j_nest', tab: 'jacky', name: 'Summon Jacky', desc: 'Spawn 1 Jacky. Costs massive Height.', cost: { height: 1000 }, multi: 2.5, power: { jackys: 1 } }, /* Rare and expensive */
+            { id: 'j_gym', tab: 'jacky', name: 'Jacky Treadmills', desc: 'Jackys produce 50% more.', cost: { jackys: 5 }, multi: 2, power: { jackyMulti: 0.5 } },
+            { id: 'j_clone', tab: 'jacky', name: 'Jacky Ring Lord', desc: 'Rapid Jacky deployment.', cost: { height: 50000, jackys: 15 }, multi: 1.5, power: { passJackys: 0.1 } }
         ];
 
         const flavorTexts = [
@@ -1110,6 +1110,7 @@
             let cs = 1;   // Base click strength
             let jm = 1;   // Jacky multiplier
             let fres = 0; // Fatigue resist
+            let pj = 0;   // Passive Jacky gen
 
             upgradesList.forEach(u => {
                 let count = state.upgrades[u.id];
@@ -1119,6 +1120,7 @@
                     if (u.power.clickStrength) cs += (u.power.clickStrength * count);
                     if (u.power.jackyMulti) jm += (u.power.jackyMulti * count);
                     if (u.power.fatigueResist) fres += (u.power.fatigueResist * count);
+                    if (u.power.passJackys) pj += (u.power.passJackys * count);
                 }
             });
 
@@ -1127,9 +1129,9 @@
 
             cachedStats.clickPower = ch * strMulti;
             cachedStats.passiveGrowth = ph * strMulti;
-            cachedStats.liftPower = cs;
-            cachedStats.jackyProd = 0.05 * jm; // Each jacky gives 0.05 base
+            cachedStats.jackyProd = 5.0 * jm; // Each jacky gives 5.0 base (much more powerful)
             cachedStats.fatigueResist = Math.min(0.8, fres);
+            cachedStats.passJackys = pj;
         }
 
         // --- Interaction ---
@@ -1383,26 +1385,29 @@
                     let wrapper = document.createElement('div');
                     wrapper.className = 'orbit-wrapper';
 
-                    let duration = 4 + Math.random() * 6;
-                    let isRev = Math.random() > 0.5;
-                    wrapper.style.animation = `${isRev ? 'rotateOrbitRev' : 'rotateOrbit'} ${duration}s linear infinite`;
+                    // Cohesive ring movement (same duration, random start point)
+                    let duration = 12;
+                    let delay = -(Math.random() * duration);
+                    wrapper.style.animation = `rotateOrbit ${duration}s linear infinite`;
+                    wrapper.style.animationDelay = `${delay}s`;
 
                     let j = document.createElement('div');
                     j.className = 'orbit-jacky';
-                    let radius = 180 + Math.random() * 90; // INCREASED radius from 120 so they circle around Pauly
+                    let radius = 240; // Flat massive circle
                     j.style.left = radius + 'px';
 
                     // Counter rotate so they stay upright
-                    j.style.animation = `${isRev ? 'rotateOrbit' : 'rotateOrbitRev'} ${duration}s linear infinite`;
+                    j.style.animation = `rotateOrbitRev ${duration}s linear infinite`;
+                    j.style.animationDelay = `${delay}s`;
 
                     // Periodic clicking animation
                     setInterval(() => {
                         if (Math.random() < 0.2) {
-                            j.style.transform = 'scale(1.8)';
-                            j.style.filter = 'drop-shadow(0 4px 8px var(--secondary-dark)) brightness(1.7)';
+                            j.style.transform = 'scale(1.3)';
+                            j.style.filter = 'drop-shadow(0 6px 12px var(--secondary-dark)) brightness(2.0)';
                             setTimeout(() => {
                                 j.style.transform = 'scale(1)';
-                                j.style.filter = 'drop-shadow(0 2px 4px #000)';
+                                j.style.filter = 'drop-shadow(0 4px 8px #000)';
                             }, 250);
                         }
                     }, 1000 + Math.random() * 2000);
@@ -1459,15 +1464,17 @@
         }
 
         function checkPaulyEvolution() {
-            let targetSrc = 'pauly1.png'; // Default King Pauly
+            let targetSrc = 'pauly.png'; // Default
 
             // Priority hierarchy
             if (document.body.innerText.includes("67")) {
                 targetSrc = 'pauly3.png'; // God Mode Pauly
-            } else if (state.height >= 1000000) {
-                targetSrc = 'pauly4.png'; // True Height Master Pauly
+            } else if (state.height >= 100000000) {
+                targetSrc = 'pauly4.png'; // True Height Master Pauly (100M+)
             } else if (state.strength >= 10000) {
                 targetSrc = 'pauly2.png'; // Flame Muscular Pauly
+            } else if (state.height >= 100000) {
+                targetSrc = 'pauly1.png'; // King Pauly (100k+)
             }
 
             let img = document.getElementById('pauly-img');
