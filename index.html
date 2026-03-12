@@ -247,6 +247,11 @@
             transform: scale(1.05);
         }
 
+        .activity-btn:hover:not(.locked) {
+            transform: scale(1.03);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
         .click-area {
             position: relative;
             cursor: pointer;
@@ -398,34 +403,38 @@
             overflow: hidden;
         }
 
+        /* Shop Tabs */
         .shop-tabs {
             display: flex;
-            background: rgba(0, 0, 0, 0.3);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 5px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+            overflow-x: auto;
         }
 
         .tab-btn {
-            flex: 1;
-            padding: 15px;
             background: transparent;
             border: none;
             color: var(--text-muted);
-            font-family: inherit;
-            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: 0.2s;
-            border-bottom: 3px solid transparent;
+            font-weight: bold;
+            font-family: inherit;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .tab-btn:hover {
-            color: var(--text-light);
             background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
         }
 
         .tab-btn.active {
-            color: var(--accent-pink);
-            border-bottom-color: var(--accent-pink);
-            background: rgba(255, 107, 129, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .upgrades-container {
@@ -470,6 +479,29 @@
             filter: grayscale(1);
             cursor: not-allowed;
             background: rgba(0, 0, 0, 0.8);
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s, background 0.2s, border-color 0.2s;
+        }
+
+        .stat-box:hover {
+            transform: translateX(5px);
+            background: rgba(0, 210, 211, 0.1);
+            border-color: rgba(0, 210, 211, 0.3);
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: var(--text-gold);
+            font-size: 1.1rem;
         }
 
         .upgrade-info {
@@ -582,16 +614,19 @@
 
         .orbit-jacky {
             position: absolute;
-            width: 32px;
-            height: 32px;
-            margin-top: -16px;
-            margin-left: -16px;
+            width: 48px;
+            height: 48px;
+            margin-top: -24px;
+            margin-left: -24px;
             background-image: url('jacky.png');
             background-size: cover;
-            filter: drop-shadow(0 2px 4px #000);
-            transition: transform 0.1s, filter 0.1s;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.8));
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.2s;
+            z-index: 15;
+            will-change: transform;
         }
 
+        /* The entire swarm rotates as one cohesive unit */
         @keyframes rotateOrbit {
             0% {
                 transform: rotate(0deg);
@@ -602,6 +637,7 @@
             }
         }
 
+        /* Counter rotation keeps them upright */
         @keyframes rotateOrbitRev {
             0% {
                 transform: rotate(360deg);
@@ -609,6 +645,102 @@
 
             100% {
                 transform: rotate(0deg);
+            }
+        }
+
+        /* Achievement Toasts */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast-popup {
+            background: rgba(10, 15, 20, 0.9);
+            border-left: 4px solid var(--accent-gold);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.5s ease 4s forwards;
+            min-width: 250px;
+            text-align: center;
+        }
+
+        .toast-popup strong {
+            display: block;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
+        }
+
+        .achievement-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .achievement-item .ach-icon {
+            font-size: 1.5rem;
+            filter: grayscale(1) opacity(0.3);
+            transition: filter 0.3s;
+        }
+
+        .achievement-item.unlocked .ach-icon {
+            filter: grayscale(0) opacity(1);
+        }
+
+        .achievement-item .ach-details h4 {
+            margin: 0 0 4px 0;
+            color: var(--text-muted);
+        }
+
+        .achievement-item.unlocked .ach-details h4 {
+            color: var(--accent-gold);
+        }
+
+        .achievement-item .ach-details p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
             }
         }
 
@@ -930,16 +1062,18 @@
         <!-- Right Shop Panel -->
         <div class="shop-panel glass-panel">
             <div class="shop-tabs">
-                <button class="tab-btn active" onclick="switchTab('growth')">GROWTH</button>
-                <button class="tab-btn" id="tab-gym" style="display:none;" onclick="switchTab('gym')">GYM</button>
-                <button class="tab-btn" id="tab-jacky" style="display:none;" onclick="switchTab('jacky')">JACKY
-                    LAB</button>
+                <button class="tab-btn active" onclick="switchTab('growth')">Growth</button>
+                <button class="tab-btn" onclick="switchTab('gym')" id="tab-gym" style="display:none;">Gym</button>
+                <button class="tab-btn" onclick="switchTab('jacky')" id="tab-jacky"
+                    style="display:none;">Jackys</button>
+                <button class="tab-btn" onclick="switchTab('achievements')">Trophies</button>
             </div>
 
             <div class="upgrades-container">
                 <div class="upgrades-list active" id="shop-growth"></div>
                 <div class="upgrades-list" id="shop-gym"></div>
                 <div class="upgrades-list" id="shop-jacky"></div>
+                <div class="upgrades-list" id="shop-achievements"></div>
             </div>
         </div>
     </div>
@@ -968,13 +1102,15 @@
         </div>
     </div>
 
+    <div id="toast-container"></div>
+
     <script>
         /* ================= GAME LOGIC & STATE ================= */
         const defaultState = {
-            height: 0,
+            height: 5.5,
             strength: 0,
             rizz: 0,
-            ego: 0,
+            ego: 100,
             reputation: 0,
             jackys: 0,
             girlsTalkedTo: 0,
@@ -982,6 +1118,12 @@
             timeSinceTalk: 0,
             upgrades: {},
             milestones: [],
+            achievements: {},
+            maxHeightReached: 5.5,
+            maxStrengthReached: 0,
+            gymUnlocked: false,
+            talkUnlocked: false,
+            jackyUnlocked: false,
             lastSaveTime: Date.now()
         };
 
@@ -1004,27 +1146,41 @@
         ];
 
         const upgradesList = [
-            // Growth (Costs Height)
-            { id: 'u_posture', tab: 'growth', name: 'Better Posture', desc: '+0.1 Height per click.', cost: { height: 1.5 }, multi: 1.4, power: { clickHeight: 0.1 } },
-            { id: 'u_shoes', tab: 'growth', name: 'Elevator Shoes', desc: '+0.2 Passive Height/s.', cost: { height: 10 }, multi: 1.5, power: { passHeight: 0.2 } },
-            { id: 'u_milk', tab: 'growth', name: 'Whole Milk Gallon', desc: '+0.5 Height per click.', cost: { height: 50 }, multi: 1.4, power: { clickHeight: 0.5 } },
-            { id: 'u_stretch', tab: 'growth', name: 'Suspicious Stretching', desc: '+1.0 Passive Height/s.', cost: { height: 150 }, multi: 1.6, power: { passHeight: 1.0 } },
-            { id: 'u_nba', tab: 'growth', name: 'NBA Genetics', desc: 'Drastic height gains.', cost: { height: 1000 }, multi: 1.7, power: { passHeight: 5.0, clickHeight: 2.0 } },
-            { id: 'u_tall_prop', tab: 'growth', name: 'Tall Propaganda', desc: '+10.0 Passive Height/s. Boosts Ego.', cost: { height: 5000, reputation: 10 }, multi: 1.8, power: { passHeight: 10.0 } },
+            // Growth (Costs Height, boosts Height/Click or Height/Sec)
+            { id: 'u_milk', tab: 'growth', name: 'Whole Milk Gallon', desc: '+0.5 Height/click.', cost: { height: 10 }, multi: 1.15, power: { clickHeight: 0.5 } },
+            { id: 'u_stretch', tab: 'growth', name: 'Suspicious Stretching', desc: '+1.0 Passive Height/s.', cost: { height: 50 }, multi: 1.25, power: { passHeight: 1.0 } },
+            { id: 'u_shoes', tab: 'growth', name: 'Platform Sneakers', desc: '+2.0 Height/click.', cost: { height: 150 }, multi: 1.20, power: { clickHeight: 2.0 } },
+            { id: 'u_nba', tab: 'growth', name: 'NBA Genetics', desc: 'Drastic gains: +5.0 pass, +3.0 click.', cost: { height: 1000 }, multi: 1.30, power: { passHeight: 5.0, clickHeight: 3.0 } },
+            { id: 'u_stilt', tab: 'growth', name: 'Titanium Stilts', desc: '+25.0 Height/click.', cost: { height: 5000 }, multi: 1.25, power: { clickHeight: 25.0 } },
+            { id: 'u_tall_prop', tab: 'growth', name: 'Tall Propaganda', desc: '+50.0 Passive Height/s. Boosts Ego.', cost: { height: 12000, reputation: 5 }, multi: 1.40, power: { passHeight: 50.0 } },
 
-            // Gym (Costs Strength)
-            { id: 'g_bench', tab: 'gym', name: 'Bench Press', desc: '+1 Strength per click.', cost: { strength: 10 }, multi: 1.3, power: { clickStrength: 1 } },
-            { id: 'g_creatine', tab: 'gym', name: 'Creatine Phase', desc: 'Reduces fatigue build-up.', cost: { strength: 50 }, multi: 1.5, power: { fatigueResist: 0.2 } },
-            { id: 'g_aura', tab: 'gym', name: 'Gym Bro Aura', desc: 'Passively gain Rizz from lifting.', cost: { strength: 200, height: 6 }, multi: 1.8, power: { passRizz: 0.1 } },
+            // Gym (Costs Strength, boosts limits or strength gains)
+            { id: 'g_bench', tab: 'gym', name: 'Bench Press', desc: '+1 Strength/click.', cost: { strength: 10 }, multi: 1.20, power: { clickStrength: 1 } },
+            { id: 'g_pwr', tab: 'gym', name: 'Powerlifting Belt', desc: '+3 Strength/click.', cost: { strength: 60 }, multi: 1.25, power: { clickStrength: 3 } },
+            { id: 'g_creatine', tab: 'gym', name: 'Creatine Phase', desc: 'Reduces fatigue build-up.', cost: { strength: 200 }, multi: 1.35, power: { fatigueResist: 0.15 } },
+            { id: 'g_aura', tab: 'gym', name: 'Gym Bro Aura', desc: 'Passively gain Rizz from lifting.', cost: { strength: 500, height: 20 }, multi: 1.50, power: { passRizz: 0.1 } },
 
-            // Jackys (Costs Height or Jackys)
-            { id: 'j_nest', tab: 'jacky', name: 'Summon Jacky', desc: 'Spawn 1 Jacky. Costs Height.', cost: { height: 250 }, multi: 1.5, power: { jackys: 1 } }, /* Reverting to cheaper */
-            { id: 'j_gym', tab: 'jacky', name: 'Jacky Treadmills', desc: 'Jackys produce 50% more.', cost: { jackys: 5 }, multi: 2, power: { jackyMulti: 0.5 } },
-            { id: 'j_clone', tab: 'jacky', name: 'Jacky Ring Lord', desc: 'Rapid Jacky deployment.', cost: { height: 25000, jackys: 10 }, multi: 1.5, power: { passJackys: 0.1 } },
+            // Jackys (Costs Height or Jackys) - Buffed and Rebalanced
+            { id: 'j_nest', tab: 'jacky', name: 'Summon Jacky', desc: 'Spawn 1 Jacky. Needs Height.', cost: { height: 75 }, multi: 1.15, power: { jackys: 1 } },
+            { id: 'j_gym', tab: 'jacky', name: 'Jacky Treadmills', desc: 'Jackys produce 50% more base height.', cost: { jackys: 5 }, multi: 1.80, power: { jackyMulti: 0.5 } },
+            { id: 'j_clone', tab: 'jacky', name: 'Jacky Ring Lord', desc: 'Rapid passive Jacky deployment.', cost: { height: 8000, jackys: 10 }, multi: 1.35, power: { passJackys: 0.2 } },
+            { id: 'j_synergy', tab: 'jacky', name: 'Rizz Motivation', desc: 'Rizz boosts Jacky production heavily.', cost: { jackys: 20, rizz: 30 }, multi: 2.50, power: { rizzToJacky: 1 } },
+            { id: 'j_hive', tab: 'jacky', name: 'Hive Mind Overdrive', desc: 'Jackys now multiply passively.', cost: { jackys: 50 }, multi: 3.00, power: { passJackys: 1.0 } },
 
-            // Late Game Click Power Upgrades
-            { id: 'u_cyber', tab: 'growth', name: 'Cybernetic Fingers', desc: 'Massive click boost.', cost: { height: 200000 }, multi: 2.0, power: { clickHeight: 50.0 } },
-            { id: 'u_godhand', tab: 'growth', name: 'God Hand', desc: 'Unimaginable click power.', cost: { height: 5000000 }, multi: 2.5, power: { clickHeight: 1000.0 } }
+            // Late Game (Growth)
+            { id: 'u_cyber', tab: 'growth', name: 'Cybernetic Fingers', desc: 'Massive click boost.', cost: { height: 75000 }, multi: 1.60, power: { clickHeight: 250.0 } },
+            { id: 'u_godhand', tab: 'growth', name: 'God Hand', desc: 'Unimaginable click power.', cost: { height: 1000000 }, multi: 2.00, power: { clickHeight: 5000.0 } }
+        ];
+
+        const achievementsList = [
+            { id: 'a_tall', name: 'Noticeable', desc: 'Reach 10 feet tall.', icon: '📏', condition: s => s.height >= 10 },
+            { id: 'a_giant', name: 'Traffic Hazard', desc: 'Reach 100 feet tall.', icon: '🏢', condition: s => s.height >= 100 },
+            { id: 'a_orbit', name: 'Low Earth Orbit', desc: 'Reach 100,000 feet tall.', icon: '🛰️', condition: s => s.height >= 100000 },
+            { id: 'a_lift', name: 'Built Different', desc: 'Gain 100 Strength.', icon: '💪', condition: s => s.strength >= 100 },
+            { id: 'a_aura', name: 'God Aura', desc: 'Gain 1,000 Strength.', icon: '🔥', condition: s => s.strength >= 1000 },
+            { id: 'a_infest', name: 'Payroll For Ants', desc: 'Employ 10 Jackys.', icon: '🐜', condition: s => s.jackys >= 10 },
+            { id: 'a_swarm', name: 'Knee-High Army', desc: 'Employ 50 Jackys.', icon: '🪖', condition: s => s.jackys >= 50 },
+            { id: 'a_rizz', name: 'Weirdly Confident', desc: 'Acquire 5 Rizz.', icon: '😎', condition: s => s.rizz >= 5 }
         ];
 
         const flavorTexts = [
@@ -1052,8 +1208,12 @@
                 }
             }
 
-            checkUnlocks();
+            // Recalc cache
             recalcStats();
+
+            // Background check
+            checkAchievements();
+            checkUnlocks();
             buildShop();
             updateUI();
 
@@ -1113,6 +1273,7 @@
             let ph = 0;   // Base passive height
             let cs = 1;   // Base click strength
             let jm = 1;   // Jacky multiplier
+            let r2j = 0;  // Rizz to Jacky Synergy
             let fres = 0; // Fatigue resist
             let pj = 0;   // Passive Jacky gen
 
@@ -1125,6 +1286,7 @@
                     if (u.power.jackyMulti) jm += (u.power.jackyMulti * count);
                     if (u.power.fatigueResist) fres += (u.power.fatigueResist * count);
                     if (u.power.passJackys) pj += (u.power.passJackys * count);
+                    if (u.power.rizzToJacky) r2j += (u.power.rizzToJacky * count);
                 }
             });
 
@@ -1134,7 +1296,11 @@
             cachedStats.clickPower = ch * strMulti;
             cachedStats.passiveGrowth = ph * strMulti;
             cachedStats.liftPower = cs; // FIXED STRENGTH BUG
-            cachedStats.jackyProd = 1.0 * jm; // Dialed back Jacky base power from 5.0
+
+            // Massively Buffed Jacky Production
+            let rizzBonus = (r2j > 0) ? (1 + (Math.floor(state.rizz) / 10)) : 1;
+            cachedStats.jackyProd = 2.5 * jm * rizzBonus;
+
             cachedStats.fatigueResist = Math.min(0.8, fres);
             cachedStats.passJackys = pj;
         }
@@ -1256,6 +1422,31 @@
                     </div>
                 `;
                 document.getElementById(`shop-${u.tab}`).insertAdjacentHTML('beforeend', html);
+            });
+
+            // Build Achievements Panel
+            buildAchievementsPanel();
+        }
+
+        function buildAchievementsPanel() {
+            let container = document.getElementById('shop-achievements');
+            container.innerHTML = '';
+
+            achievementsList.forEach(a => {
+                let isUnlocked = state.achievements[a.id];
+                let titleColor = isUnlocked ? 'var(--accent-gold)' : 'var(--text-muted)';
+                let iconFilter = isUnlocked ? 'grayscale(0) opacity(1)' : 'grayscale(1) opacity(0.3)';
+
+                let html = `
+                    <div class="achievement-item ${isUnlocked ? 'unlocked' : ''}" id="ach-panel-${a.id}">
+                        <div class="ach-icon" style="filter: ${iconFilter}">${a.icon}</div>
+                        <div class="ach-details">
+                            <h4 style="color: ${titleColor};">${a.name}</h4>
+                            <p>${isUnlocked ? a.desc : '???'}</p>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
             });
         }
 
@@ -1382,42 +1573,50 @@
             let container = document.getElementById('orbit-swarm');
             if (!container) return;
             let jCount = Math.floor(state.jackys);
-            let visualCount = Math.min(30, jCount); // cap dom elements
-            let currentVisuals = container.children.length;
+            let visualCount = Math.min(50, jCount); // cap dom elements slightly higher
 
-            if (currentVisuals < visualCount) {
-                for (let i = 0; i < (visualCount - currentVisuals); i++) {
-                    let wrapper = document.createElement('div');
-                    wrapper.className = 'orbit-wrapper';
+            // If the count hasn't changed, don't re-render everything to prevent lag
+            if (container.children.length === visualCount) return;
 
-                    // Reverting to more swarm-like orbit
-                    let duration = 6 + Math.random() * 8;
-                    let isRev = Math.random() > 0.5;
-                    wrapper.style.animation = `${isRev ? 'rotateOrbitRev' : 'rotateOrbit'} ${duration}s linear infinite`;
+            // Clear and rebuild for perfect synchronized ring distribution
+            container.innerHTML = '';
 
-                    let j = document.createElement('div');
-                    j.className = 'orbit-jacky';
-                    let radius = 150 + Math.random() * 60; // Spread them out again
-                    j.style.left = radius + 'px';
+            // Add central rotation animation to wrapper
+            container.style.animation = `rotateOrbit 15s linear infinite`;
 
-                    // Counter rotate so they stay upright
-                    j.style.animation = `${isRev ? 'rotateOrbit' : 'rotateOrbitRev'} ${duration}s linear infinite`;
+            for (let i = 0; i < visualCount; i++) {
+                let j = document.createElement('div');
+                j.className = 'orbit-jacky';
 
-                    // Periodic clicking animation
-                    setInterval(() => {
-                        if (Math.random() < 0.2) {
-                            j.style.transform = 'scale(1.5)';
-                            j.style.filter = 'drop-shadow(0 4px 8px var(--secondary-dark)) brightness(1.7)';
-                            setTimeout(() => {
-                                j.style.transform = 'scale(1)';
-                                j.style.filter = 'drop-shadow(0 2px 4px #000)';
-                            }, 250);
-                        }
-                    }, 1000 + Math.random() * 2000);
+                // Perfect mathematical circle spacing
+                let angle = (i / visualCount) * (2 * Math.PI);
+                let radius = 220; // Perfect, tight premium ring
 
-                    wrapper.appendChild(j);
-                    container.appendChild(wrapper);
-                }
+                let x = Math.cos(angle) * radius;
+                let y = Math.sin(angle) * radius;
+
+                j.style.left = x + 'px';
+                j.style.top = y + 'px';
+
+                // Counter rotate so they stay upright
+                j.style.animation = `rotateOrbitRev 15s linear infinite`;
+
+                // Add staggered popping animation
+                j.style.animationDelay = `-${Math.random() * 15}s`;
+
+                // Periodic clicking animation
+                setInterval(() => {
+                    if (Math.random() < 0.15) {
+                        j.style.transform = 'scale(1.4)';
+                        j.style.filter = 'drop-shadow(0 6px 12px var(--secondary-dark)) brightness(1.5)';
+                        setTimeout(() => {
+                            j.style.transform = 'scale(1)';
+                            j.style.filter = 'drop-shadow(0 4px 6px rgba(0,0,0,0.8))';
+                        }, 250);
+                    }
+                }, 1000 + Math.random() * 2000);
+
+                container.appendChild(j);
             }
         }
 
@@ -1484,6 +1683,33 @@
             if (img && !img.src.endsWith(targetSrc)) {
                 img.src = targetSrc;
             }
+        }
+
+        function checkAchievements() {
+            let newlyUnlocked = false;
+            achievementsList.forEach(a => {
+                if (!state.achievements[a.id]) {
+                    if (a.condition(state)) {
+                        state.achievements[a.id] = true;
+                        newlyUnlocked = true;
+                        showAchievementToast(a);
+                    }
+                }
+            });
+            if (newlyUnlocked) buildAchievementsPanel();
+        }
+
+        function showAchievementToast(ach) {
+            let container = document.getElementById('toast-container');
+            let toast = document.createElement('div');
+            toast.className = 'toast-popup';
+            toast.innerHTML = `<strong>🏆 Achievement Unlocked</strong> ${ach.icon} ${ach.name}`;
+            container.appendChild(toast);
+
+            // Remove after animation completes
+            setTimeout(() => {
+                if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 4500);
         }
 
         function createParticle(x, y, text, pClass) {
