@@ -50,7 +50,7 @@
             background-image: url('background.png');
             background-size: cover;
             background-position: center;
-            z-index: -2;
+            z-index: 0;
             animation: parallax 30s ease-in-out infinite alternate;
         }
 
@@ -60,9 +60,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(30, 39, 46, 0.8), rgba(47, 53, 66, 0.9));
-            backdrop-filter: blur(8px);
-            z-index: -1;
+            background: linear-gradient(135deg, rgba(30, 39, 46, 0.4), rgba(47, 53, 66, 0.5));
+            backdrop-filter: blur(2px);
+            z-index: 1;
         }
 
         @keyframes parallax {
@@ -556,62 +556,54 @@
             font-weight: bold;
         }
 
-        .jacky-swarm-area {
-            height: 60px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden;
+        /* ----- Jacky Orbit System ----- */
+        #orbit-swarm {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            z-index: 10;
+            pointer-events: none;
         }
 
-        .jacky-sprite {
+        .orbit-wrapper {
             position: absolute;
-            width: 16px;
-            height: 16px;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .orbit-jacky {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            margin-top: -12px;
+            margin-left: -12px;
             background-image: url('jacky.png');
             background-size: cover;
-            animation: swarmBugs 5s infinite;
-            filter: drop-shadow(0 2px 2px #000);
+            filter: drop-shadow(0 2px 4px #000);
+            transition: transform 0.1s, filter 0.1s;
         }
 
-        @keyframes swarmBugs {
+        @keyframes rotateOrbit {
             0% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-
-            25% {
-                transform: translate(10px, -5px) rotate(10deg);
-            }
-
-            50% {
-                transform: translate(5px, 5px) rotate(-10deg);
-            }
-
-            75% {
-                transform: translate(-5px, -10px) rotate(5deg);
+                transform: rotate(0deg);
             }
 
             100% {
-                transform: translate(0, 0) rotate(0deg);
+                transform: rotate(360deg);
             }
         }
 
-        .jacky-sprite.clicking {
-            animation: jackyClick 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            filter: drop-shadow(0 4px 6px var(--secondary-dark)) brightness(1.5);
-        }
-
-        @keyframes jackyClick {
+        @keyframes rotateOrbitRev {
             0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.5) translateY(-5px);
+                transform: rotate(360deg);
             }
 
             100% {
-                transform: scale(1);
+                transform: rotate(0deg);
             }
         }
 
@@ -866,9 +858,6 @@
                     <span>JACKY COLONY</span>
                     <span id="val-jackys">0</span>
                 </div>
-                <div class="jacky-swarm-area" id="jacky-swarm">
-                    <!-- Swarm sprites injected here -->
-                </div>
                 <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px; text-align: center;" id="jacky-prod">
                     Generates 0 height/s
                 </div>
@@ -896,7 +885,8 @@
             </div>
 
             <div class="click-area active-taller" id="click-circle" onclick="clickPauly(event)">
-                <img src="pauly.png" id="pauly-img" alt="Pauly"
+                <div id="orbit-swarm"></div>
+                <img src="pauly1.png" id="pauly-img" alt="Pauly"
                     onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><circle cx=\'100\' cy=\'100\' r=\'100\' fill=\'%2357606f\'/><text x=\'50%\' y=\'50%\' font-family=\'sans-serif\' font-size=\'20\' fill=\'white\' text-anchor=\'middle\' dy=\'.3em\'>Pauly</text></svg>'">
             </div>
 
@@ -1377,28 +1367,43 @@
         }
 
         function updateJackyVisuals() {
-            let container = document.getElementById('jacky-swarm');
+            let container = document.getElementById('orbit-swarm');
+            if (!container) return;
             let jCount = Math.floor(state.jackys);
-            let visualCount = Math.min(20, jCount); // cap dom elements
+            let visualCount = Math.min(30, jCount); // cap dom elements
             let currentVisuals = container.children.length;
 
             if (currentVisuals < visualCount) {
                 for (let i = 0; i < (visualCount - currentVisuals); i++) {
+                    let wrapper = document.createElement('div');
+                    wrapper.className = 'orbit-wrapper';
+
+                    let duration = 4 + Math.random() * 6;
+                    let isRev = Math.random() > 0.5;
+                    wrapper.style.animation = `${isRev ? 'rotateOrbitRev' : 'rotateOrbit'} ${duration}s linear infinite`;
+
                     let j = document.createElement('div');
-                    j.className = 'jacky-sprite';
-                    j.style.left = Math.random() * 80 + '%';
-                    j.style.top = Math.random() * 40 + 'px';
-                    j.style.animationDelay = (Math.random() * -5) + 's';
+                    j.className = 'orbit-jacky';
+                    let radius = 180 + Math.random() * 90; // INCREASED radius from 120 so they circle around Pauly
+                    j.style.left = radius + 'px';
 
-                    // Periodic "clicking" animation
+                    // Counter rotate so they stay upright
+                    j.style.animation = `${isRev ? 'rotateOrbit' : 'rotateOrbitRev'} ${duration}s linear infinite`;
+
+                    // Periodic clicking animation
                     setInterval(() => {
-                        if (Math.random() < 0.2) { // 20% chance every 1s
-                            j.classList.add('clicking');
-                            setTimeout(() => j.classList.remove('clicking'), 300);
+                        if (Math.random() < 0.2) {
+                            j.style.transform = 'scale(1.8)';
+                            j.style.filter = 'drop-shadow(0 4px 8px var(--secondary-dark)) brightness(1.7)';
+                            setTimeout(() => {
+                                j.style.transform = 'scale(1)';
+                                j.style.filter = 'drop-shadow(0 2px 4px #000)';
+                            }, 250);
                         }
-                    }, 1000 + Math.random() * 2000); // randomize interval between 1-3s
+                    }, 1000 + Math.random() * 2000);
 
-                    container.appendChild(j);
+                    wrapper.appendChild(j);
+                    container.appendChild(wrapper);
                 }
             }
         }
@@ -1445,6 +1450,25 @@
             document.getElementById('prog-text-fatigue').innerText = Math.floor(state.gymFatigue) + '%';
 
             updateShopUI();
+            checkPaulyEvolution();
+        }
+
+        function checkPaulyEvolution() {
+            let targetSrc = 'pauly1.png'; // Default King Pauly
+
+            // Priority hierarchy
+            if (document.body.innerText.includes("67")) {
+                targetSrc = 'pauly3.png'; // God Mode Pauly
+            } else if (state.height >= 1000000) {
+                targetSrc = 'pauly4.png'; // True Height Master Pauly
+            } else if (state.strength >= 10000) {
+                targetSrc = 'pauly2.png'; // Flame Muscular Pauly
+            }
+
+            let img = document.getElementById('pauly-img');
+            if (img && !img.src.endsWith(targetSrc)) {
+                img.src = targetSrc;
+            }
         }
 
         function createParticle(x, y, text, pClass) {
