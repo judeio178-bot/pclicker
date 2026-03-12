@@ -108,6 +108,7 @@
       gap: 20px;
       overflow: hidden;
       z-index: 10;
+      padding-right: 230px;
     }
 
     .glass-panel {
@@ -802,6 +803,40 @@
     .modal-btn:active {
       transform: scale(0.95);
     }
+
+    /* sidebar ad */
+    #coderunners-ad {
+      position: fixed;
+      right: 16px;
+      top: 120px;
+      width: 180px;
+      z-index: 30;
+      pointer-events: auto;
+    }
+
+    #coderunners-ad img {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #coderunners-ad img:hover {
+      transform: scale(1.03);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75);
+    }
+
+    @media (max-width: 1400px) {
+      .main-container {
+        padding-right: 20px;
+      }
+
+      #coderunners-ad {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -825,13 +860,13 @@
       <div class="stat-box tooltip" id="box-strength" style="display:none;">
         <div class="stat-label">STRENGTH</div>
         <div class="stat-value" id="val-strength" style="color:var(--text-gold);">0</div>
-        <span class="tooltiptext">Boosts click power and height multiplier. Gain by Lifting Weights.</span>
+        <span class="tooltiptext">Boosts click power and height multiplier. Gain by lifting.</span>
       </div>
 
       <div class="stat-box tooltip" id="box-rizz" style="display:none;">
         <div class="stat-label">RIZZ</div>
         <div class="stat-value" id="val-rizz" style="color:var(--accent-pink);">0</div>
-        <span class="tooltiptext">Aura of attraction. Boosts passive generation and unlocks social paths.</span>
+        <span class="tooltiptext">Aura of attraction. Helps social success and special Jacky synergy.</span>
       </div>
 
       <div class="stat-box">
@@ -842,7 +877,7 @@
       <div class="stat-box tooltip" id="box-reputation" style="display:none;">
         <div class="stat-label">REPUTATION</div>
         <div class="stat-value" id="val-rep">0</div>
-        <span class="tooltiptext">How the world views you.</span>
+        <span class="tooltiptext">How the world sees Pauly.</span>
       </div>
 
       <div class="jacky-panel" id="jacky-panel" style="display:none;">
@@ -950,6 +985,11 @@
 
   <div id="toast-container"></div>
 
+  <!-- sidebar ad -->
+  <div id="coderunners-ad">
+    <img src="coderunners_ad.png" alt="Join Coderunners today!">
+  </div>
+
   <script>
     const defaultState = {
       height: 5.5,
@@ -1036,7 +1076,9 @@
       "Posture check: F-",
       "The grind never stops. Only pauses for snacks.",
       "Drinking milk out of the carton.",
-      "Looking for elevator shoes on eBay."
+      "Looking for elevator shoes on eBay.",
+      "Join Coderunners today. Apparently.",
+      "Jackys are unionizing."
     ];
 
     function init() {
@@ -1224,6 +1266,7 @@
       state.height += amt;
       checkMilestones();
       checkUnlocks();
+      checkAchievements();
     }
 
     function switchTab(tabId) {
@@ -1346,6 +1389,7 @@
       recalcStats();
       updateShopUI();
       updateUI();
+      checkAchievements();
     }
 
     function checkMilestones() {
@@ -1358,8 +1402,8 @@
               document.getElementById('act-lift').classList.remove('locked');
               document.getElementById('tt-lift').style.display = 'none';
               document.getElementById('prog-wrap-fatigue').style.display = 'block';
-              document.getElementById('box-strength').style.display = 'block';
-              document.getElementById('tab-gym').style.display = 'block';
+              document.getElementById('box-strength').style.display = 'flex';
+              document.getElementById('tab-gym').style.display = 'inline-block';
               log("UNLOCKED: The Gym Activity", "milestone");
             }
             if (unlockFlag === 'talk') {
@@ -1368,12 +1412,12 @@
               log("UNLOCKED: Talk to Girls Activity", "milestone");
             }
             if (unlockFlag === 'rizz_ui') {
-              document.getElementById('box-rizz').style.display = 'block';
-              document.getElementById('box-reputation').style.display = 'block';
+              document.getElementById('box-rizz').style.display = 'flex';
+              document.getElementById('box-reputation').style.display = 'flex';
             }
             if (unlockFlag === 'jackys') {
               document.getElementById('jacky-panel').style.display = 'block';
-              document.getElementById('tab-jacky').style.display = 'block';
+              document.getElementById('tab-jacky').style.display = 'inline-block';
               log("UNLOCKED: Jacky Swarm", "milestone");
               updateJackyVisuals();
             }
@@ -1390,18 +1434,18 @@
     function checkUnlocks() {
       if (state.height >= 3 || state.milestones.includes(3)) {
         document.getElementById('act-lift').classList.remove('locked');
-        document.getElementById('box-strength').style.display = 'block';
-        document.getElementById('tab-gym').style.display = 'block';
+        document.getElementById('box-strength').style.display = 'flex';
+        document.getElementById('tab-gym').style.display = 'inline-block';
         document.getElementById('prog-wrap-fatigue').style.display = 'block';
       }
       if (state.height >= 5 || state.strength >= 20 || state.milestones.includes(5)) {
         document.getElementById('act-talk').classList.remove('locked');
-        document.getElementById('box-rizz').style.display = 'block';
-        document.getElementById('box-reputation').style.display = 'block';
+        document.getElementById('box-rizz').style.display = 'flex';
+        document.getElementById('box-reputation').style.display = 'flex';
       }
       if (state.height >= 8 || state.milestones.includes(8)) {
         document.getElementById('jacky-panel').style.display = 'block';
-        document.getElementById('tab-jacky').style.display = 'block';
+        document.getElementById('tab-jacky').style.display = 'inline-block';
         updateJackyVisuals();
       }
     }
