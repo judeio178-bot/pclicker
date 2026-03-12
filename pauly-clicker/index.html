@@ -35,22 +35,25 @@
             font-family: 'Outfit', sans-serif;
             color: var(--text-light);
             height: 100vh;
+            width: 100vw;
+            margin: 0;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             position: relative;
+            background-color: transparent;
         }
 
         .bg-layer {
             position: absolute;
-            top: -5%;
-            left: -5%;
-            width: 110%;
-            height: 110%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-image: url('background.png');
             background-size: cover;
             background-position: center;
-            z-index: 0;
+            z-index: -2;
             animation: parallax 30s ease-in-out infinite alternate;
         }
 
@@ -62,7 +65,7 @@
             height: 100%;
             background: linear-gradient(135deg, rgba(30, 39, 46, 0.4), rgba(47, 53, 66, 0.5));
             backdrop-filter: blur(2px);
-            z-index: 1;
+            z-index: -1;
         }
 
         @keyframes parallax {
@@ -118,15 +121,16 @@
             padding: 20px;
             gap: 20px;
             overflow: hidden;
-            z-index: 1;
+            z-index: 10;
         }
 
         /* ----- Base Glass Panel Style ----- */
         .glass-panel {
-            background: var(--bg-panel);
+            background: rgba(30, 40, 50, 0.6);
+            /* Semi-transparent panel background */
             backdrop-filter: blur(12px);
             border-radius: var(--panel-radius);
-            border: 1px solid var(--bg-panel-border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
@@ -138,6 +142,7 @@
             gap: 15px;
             padding: 20px;
             overflow-y: auto;
+            background: rgba(30, 40, 50, 0.6);
         }
 
         /* Minimal scrollbar */
